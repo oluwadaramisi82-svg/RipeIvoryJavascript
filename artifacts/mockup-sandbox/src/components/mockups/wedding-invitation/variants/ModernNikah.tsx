@@ -11,6 +11,31 @@ function twoDigits(value: number) {
   return String(value).padStart(2, '0');
 }
 
+// Islamic 8-pointed star motif as inline SVG
+function StarMotif({ size = 48, color = '#c9a84c' }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <polygon points="24,2 29,18 44,18 32,28 37,44 24,35 11,44 16,28 4,18 19,18" fill={color} opacity="0.22" />
+      <polygon points="24,6 28,19 42,19 31,27 35,41 24,33 13,41 17,27 6,19 20,19" fill={color} opacity="0.55" />
+    </svg>
+  );
+}
+
+// Geometric border strip
+function GeoBorder({ color = '#c9a84c' }: { color?: string }) {
+  return (
+    <svg width="100%" height="16" viewBox="0 0 240 16" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <pattern id="geo-diamond" x="0" y="0" width="24" height="16" patternUnits="userSpaceOnUse">
+          <polygon points="12,1 23,8 12,15 1,8" fill="none" stroke={color} strokeWidth="1" opacity="0.6" />
+          <rect x="10.5" y="6.5" width="3" height="3" fill={color} opacity="0.4" transform="rotate(45 12 8)" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="16" fill="url(#geo-diamond)" />
+    </svg>
+  );
+}
+
 export function ModernNikah() {
   const [now, setNow] = useState(() => Date.now());
 
@@ -31,155 +56,499 @@ export function ModernNikah() {
   }, [now]);
 
   return (
-    <div className="modern-nikah">
+    <div className="mn-root">
       <link
         rel="stylesheet"
         media="print"
-        onLoad={(event) => { event.currentTarget.media = 'all'; }}
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap"
+        onLoad={(e) => { e.currentTarget.media = 'all'; }}
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap"
       />
       <style>{`
-        .modern-nikah {
-          --ink: #181818;
-          --sage: #4a7c6a;
-          background: #ffffff;
+        /* ── Tokens ── */
+        .mn-root {
+          --emerald: #1a5c42;
+          --emerald-mid: #276b4e;
+          --emerald-light: #e8f0ec;
+          --gold: #c9a84c;
+          --gold-pale: #f5ead2;
+          --ivory: #fdf8f0;
+          --ink: #1a1a18;
+          --ink-muted: #5a5a50;
+          background: var(--ivory);
           color: var(--ink);
           font-family: 'DM Sans', sans-serif;
           min-height: 100dvh;
+        }
+        .mn-root * { box-sizing: border-box; }
+        .mn-root a { color: inherit; text-decoration: none; }
+        .mn-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+        .mn-wrap { margin: 0 auto; max-width: 1280px; padding-left: clamp(20px, 5vw, 72px); padding-right: clamp(20px, 5vw, 72px); }
+        .mn-kicker { font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0; }
+
+        /* ── Hero ── */
+        .mn-hero {
+          background: var(--emerald);
+          color: var(--ivory);
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          min-height: min(860px, 100dvh);
+          position: relative;
           overflow: hidden;
         }
-        .modern-nikah * { box-sizing: border-box; }
-        .modern-nikah a { color: inherit; text-decoration: none; }
-        .mn-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
-        .mn-wrap { margin: 0 auto; max-width: 1320px; padding-left: clamp(24px, 5vw, 76px); padding-right: clamp(24px, 5vw, 76px); }
-        .mn-kicker { font-size: 10px; font-weight: 600; letter-spacing: .2em; line-height: 1.4; text-transform: uppercase; }
-        .mn-hero { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(300px, .98fr); min-height: min(860px, 100dvh); }
-        .mn-hero-copy { align-self: center; padding: 72px clamp(24px, 7vw, 112px) 72px clamp(24px, 8vw, 120px); }
-        .mn-opening { margin: 0 0 72px; max-width: 230px; font-size: 11px; line-height: 1.8; }
-        .mn-names { font-size: clamp(75px, 10.8vw, 166px); font-weight: 500; letter-spacing: -.065em; line-height: .76; margin: 0; }
-        .mn-names span { display: block; margin-left: clamp(30px, 5vw, 78px); }
-        .mn-hero-note { font-size: 12px; line-height: 1.7; margin: 62px 0 0; max-width: 270px; }
-        .mn-photo { min-height: 620px; overflow: hidden; }
-        .mn-photo img { display: block; height: 100%; width: 100%; object-fit: cover; object-position: center; }
-        .mn-section { padding-bottom: clamp(96px, 13vw, 190px); padding-top: clamp(96px, 13vw, 190px); }
-        .mn-intro { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr); gap: 8vw; }
-        .mn-intro-label { padding-top: 8px; }
-        .mn-quote { font-size: clamp(32px, 4.2vw, 62px); letter-spacing: -.035em; line-height: 1.01; margin: 0; max-width: 830px; }
-        .mn-quote em { font-style: normal; }
-        .mn-details { border-top: 1px solid var(--ink); display: grid; grid-template-columns: 1.15fr .65fr 1.2fr; gap: 28px; margin-top: 130px; padding-top: 18px; }
-        .mn-detail-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
-        .mn-detail-value { display: block; font-size: 14px; line-height: 1.5; margin-top: 13px; }
-        .mn-event { display: grid; grid-template-columns: .65fr 1.35fr; gap: 8vw; }
-        .mn-event-title { font-size: clamp(48px, 6.5vw, 92px); letter-spacing: -.055em; line-height: .82; margin: 0; }
-        .mn-event-copy { font-size: 14px; line-height: 1.8; max-width: 520px; }
-        .mn-event-copy p { margin: 0 0 34px; }
-        .mn-event-copy strong { font-weight: 600; }
-        .mn-countdown { align-items: baseline; display: flex; gap: 22px; margin-top: 42px; }
-        .mn-count-item { display: flex; flex-direction: column; }
-        .mn-count-number { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 42px; line-height: 1; }
-        .mn-count-label { font-size: 8px; font-weight: 600; letter-spacing: .16em; margin-top: 6px; text-transform: uppercase; }
-        .mn-countdown .mn-count-item:first-child .mn-count-number { color: var(--sage); }
-        .mn-verse { padding-bottom: clamp(112px, 16vw, 220px); padding-top: clamp(112px, 16vw, 220px); text-align: center; }
-        .mn-verse blockquote { font-size: clamp(25px, 3.25vw, 48px); font-style: italic; letter-spacing: -.025em; line-height: 1.12; margin: 28px auto 0; max-width: 930px; }
-        .mn-attribution { font-size: 10px; font-weight: 600; letter-spacing: .15em; margin-top: 28px; text-transform: uppercase; }
-        .mn-toast { border-top: 1px solid var(--ink); font-size: clamp(22px, 2.8vw, 38px); font-style: italic; line-height: 1.1; margin: 110px auto 0; max-width: 590px; padding-top: 24px; }
-        .mn-toast cite { display: block; font-size: 10px; font-style: normal; font-weight: 600; letter-spacing: .15em; margin-top: 23px; text-transform: uppercase; }
-        .mn-rsvp { padding-bottom: 80px; }
-        .mn-rsvp-head { align-items: end; display: flex; justify-content: space-between; margin-bottom: 34px; }
-        .mn-rsvp-title { font-size: clamp(48px, 6vw, 86px); letter-spacing: -.06em; line-height: .8; margin: 0; }
-        .mn-dress { font-size: 11px; line-height: 1.8; text-align: right; }
-        .mn-dress strong { font-weight: 600; }
-        .mn-contacts { display: grid; gap: 10px; grid-template-columns: repeat(4, 1fr); }
-        .mn-contact { border: 1px solid var(--ink); border-radius: 999px; display: flex; font-size: 11px; justify-content: space-between; padding: 14px 17px; transition: background .2s ease, color .2s ease; }
-        .mn-contact:hover { background: var(--ink); color: #ffffff; }
-        .mn-contact span:last-child { font-variant-numeric: tabular-nums; }
-        @media (max-width: 760px) {
-          .mn-hero { display: flex; flex-direction: column; min-height: 0; }
-          .mn-hero-copy { padding-bottom: 90px; padding-top: 52px; }
-          .mn-opening { margin-bottom: 64px; }
-          .mn-photo { height: 74vw; min-height: 400px; }
-          .mn-intro, .mn-event { grid-template-columns: 1fr; gap: 40px; }
-          .mn-details { margin-top: 82px; }
-          .mn-contacts { grid-template-columns: repeat(2, 1fr); }
+        /* decorative arch behind photo */
+        .mn-hero::before {
+          content: '';
+          position: absolute;
+          inset: 0 50% 0 auto;
+          width: 52%;
+          background: var(--emerald-mid);
+          clip-path: ellipse(100% 52% at 100% 50%);
+          pointer-events: none;
+        }
+        .mn-hero-copy {
+          align-self: center;
+          padding: 72px clamp(20px, 6vw, 88px) 72px clamp(20px, 8vw, 104px);
+          position: relative;
+          z-index: 1;
+        }
+        .mn-bismillah {
+          font-size: 11px;
+          line-height: 1.8;
+          color: var(--gold-pale);
+          margin: 0 0 48px;
+          max-width: 220px;
+        }
+        .mn-names {
+          font-size: clamp(60px, 9vw, 140px);
+          font-weight: 500;
+          letter-spacing: -.06em;
+          line-height: .78;
+          margin: 0 0 48px;
+          color: #fff;
+        }
+        .mn-names em {
+          display: block;
+          font-style: normal;
+          color: var(--gold);
+        }
+        .mn-amp {
+          font-size: clamp(18px, 2.5vw, 32px);
+          color: var(--gold);
+          display: block;
+          margin: 12px 0 8px clamp(2px, 0.5vw, 8px);
+          font-style: italic;
+        }
+        .mn-hero-sub {
+          font-size: 12px;
+          line-height: 1.8;
+          color: var(--gold-pale);
+          max-width: 240px;
+        }
+        .mn-photo-wrap {
+          position: relative;
+          z-index: 1;
+          overflow: hidden;
+          display: flex;
+          align-items: stretch;
+        }
+        .mn-photo-wrap img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center top;
+        }
+        /* gold frame line on photo */
+        .mn-photo-wrap::after {
+          content: '';
+          position: absolute;
+          inset: 20px;
+          border: 1.5px solid var(--gold);
+          opacity: .35;
+          pointer-events: none;
+        }
+
+        /* ── Gold band ── */
+        .mn-band {
+          background: var(--gold);
+          padding: 14px 0;
+          text-align: center;
+        }
+        .mn-band-text {
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: .28em;
+          text-transform: uppercase;
+          color: var(--emerald);
+        }
+
+        /* ── Invitation block ── */
+        .mn-invite {
+          padding: clamp(72px, 10vw, 140px) 0;
+        }
+        .mn-invite-inner {
+          display: grid;
+          grid-template-columns: minmax(160px, .6fr) 1fr;
+          gap: 6vw;
+          align-items: start;
+        }
+        .mn-invite-label { padding-top: 6px; }
+        .mn-invite-label p + p { margin-top: 12px; color: var(--ink-muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+        .mn-quote {
+          font-size: clamp(24px, 3.2vw, 50px);
+          letter-spacing: -.03em;
+          line-height: 1.1;
+          margin: 0;
+          font-weight: 400;
+        }
+        .mn-quote em { font-style: italic; color: var(--emerald); }
+
+        /* ── Details strip ── */
+        .mn-details-strip {
+          background: var(--emerald-light);
+          border-top: 3px solid var(--gold);
+          border-bottom: 3px solid var(--gold);
+          padding: clamp(36px, 5vw, 64px) 0;
+          margin-top: clamp(48px, 6vw, 80px);
+        }
+        .mn-details-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1.6fr;
+          gap: 32px;
+        }
+        .mn-detail-label {
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: .2em;
+          text-transform: uppercase;
+          color: var(--gold);
+        }
+        .mn-detail-value {
+          display: block;
+          font-size: 15px;
+          line-height: 1.5;
+          margin-top: 10px;
+          color: var(--ink);
+        }
+        .mn-detail-value strong { color: var(--emerald); font-weight: 600; }
+
+        /* ── Programme ── */
+        .mn-programme {
+          padding: clamp(80px, 11vw, 160px) 0;
+          display: grid;
+          grid-template-columns: .5fr 1fr;
+          gap: 8vw;
+        }
+        .mn-prog-title {
+          font-size: clamp(42px, 6vw, 88px);
+          letter-spacing: -.055em;
+          line-height: .82;
+          margin: 0;
+          color: var(--emerald);
+        }
+        .mn-prog-body p { font-size: 14px; line-height: 1.9; margin: 0 0 28px; }
+        .mn-prog-body strong { color: var(--emerald); font-weight: 600; }
+        .mn-countdown {
+          display: flex;
+          gap: 20px;
+          margin-top: 40px;
+          padding-top: 28px;
+          border-top: 1px solid var(--gold);
+        }
+        .mn-count-item { display: flex; flex-direction: column; align-items: center; }
+        .mn-count-number {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 46px;
+          line-height: 1;
+          color: var(--emerald);
+        }
+        .mn-count-label {
+          font-size: 8px;
+          font-weight: 600;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+          color: var(--ink-muted);
+          margin-top: 6px;
+        }
+
+        /* ── Verse ── */
+        .mn-verse {
+          background: var(--emerald);
+          color: var(--ivory);
+          padding: clamp(80px, 12vw, 160px) 0;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+        /* faint geometric background pattern */
+        .mn-verse::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          background-image: repeating-conic-gradient(var(--emerald-mid) 0% 25%, transparent 0% 50%);
+          background-size: 32px 32px;
+          opacity: .18;
+          pointer-events: none;
+        }
+        .mn-verse > * { position: relative; z-index: 1; }
+        .mn-verse .mn-kicker { color: var(--gold); }
+        .mn-verse blockquote {
+          font-size: clamp(22px, 3vw, 44px);
+          font-style: italic;
+          line-height: 1.15;
+          letter-spacing: -.02em;
+          margin: 28px auto 0;
+          max-width: 860px;
+          color: #fff;
+        }
+        .mn-attribution {
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+          color: var(--gold);
+          margin-top: 24px;
+        }
+        .mn-couple-note {
+          margin: 48px auto 0;
+          max-width: 520px;
+          padding-top: 32px;
+          border-top: 1px solid rgba(201,168,76,.4);
+          font-size: clamp(18px, 2.2vw, 28px);
+          font-style: italic;
+          line-height: 1.2;
+          color: var(--gold-pale);
+        }
+        .mn-couple-note cite {
+          display: block;
+          font-size: 10px;
+          font-style: normal;
+          font-weight: 600;
+          letter-spacing: .16em;
+          text-transform: uppercase;
+          color: var(--gold);
+          margin-top: 20px;
+        }
+
+        /* ── RSVP ── */
+        .mn-rsvp {
+          padding: clamp(72px, 10vw, 140px) 0 clamp(56px, 8vw, 100px);
+        }
+        .mn-rsvp-head {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          margin-bottom: 36px;
+          gap: 24px;
+          flex-wrap: wrap;
+        }
+        .mn-rsvp-title {
+          font-size: clamp(52px, 7vw, 100px);
+          letter-spacing: -.06em;
+          line-height: .8;
+          margin: 0;
+          color: var(--emerald);
+        }
+        .mn-dress {
+          font-size: 12px;
+          line-height: 1.9;
+          text-align: right;
+          color: var(--ink-muted);
+        }
+        .mn-dress strong { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px; }
+        .mn-dress span { display: block; }
+        .mn-dress .bride { color: var(--emerald); font-weight: 500; }
+        .mn-dress .groom { color: #b08d30; font-weight: 500; }
+        .mn-contacts {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+        }
+        .mn-contact {
+          border: 1.5px solid var(--emerald);
+          border-radius: 4px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 16px 18px;
+          font-size: 11px;
+          transition: background .2s ease, color .2s ease, border-color .2s ease;
+        }
+        .mn-contact:hover {
+          background: var(--emerald);
+          color: #fff;
+          border-color: var(--emerald);
+        }
+        .mn-contact-name { font-weight: 600; font-size: 12px; color: var(--emerald); transition: color .2s; }
+        .mn-contact:hover .mn-contact-name { color: var(--gold); }
+        .mn-contact-num { font-variant-numeric: tabular-nums; color: var(--ink-muted); font-size: 11px; }
+        .mn-contact:hover .mn-contact-num { color: rgba(255,255,255,.8); }
+
+        /* ── Footer ── */
+        .mn-footer {
+          background: var(--ink);
+          color: rgba(255,255,255,.45);
+          padding: 28px 0;
+          font-size: 10px;
+          letter-spacing: .1em;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 780px) {
+          .mn-hero { grid-template-columns: 1fr; min-height: 0; }
+          .mn-hero::before { display: none; }
+          .mn-photo-wrap { height: 72vw; min-height: 340px; }
+          .mn-invite-inner { grid-template-columns: 1fr; gap: 32px; }
+          .mn-details-grid { grid-template-columns: 1fr 1fr; }
+          .mn-programme { grid-template-columns: 1fr; gap: 40px; }
+          .mn-contacts { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 480px) {
-          .mn-names { font-size: 21vw; }
-          .mn-details { gap: 16px; grid-template-columns: 1fr; }
-          .mn-detail-value { margin-top: 7px; }
-          .mn-rsvp-head { align-items: start; flex-direction: column; gap: 32px; }
-          .mn-dress { text-align: left; }
+          .mn-hero-copy { padding-top: 52px; padding-bottom: 56px; }
+          .mn-names { font-size: 19vw; }
+          .mn-details-grid { grid-template-columns: 1fr; }
           .mn-contacts { grid-template-columns: 1fr; }
-          .mn-contact { padding: 15px 18px; }
+          .mn-rsvp-head { flex-direction: column; align-items: flex-start; }
+          .mn-dress { text-align: left; }
         }
+
+        /* ── Entrance animation ── */
         @media (prefers-reduced-motion: no-preference) {
-          .mn-hero-copy, .mn-photo { animation: mn-in .8s ease both; }
-          .mn-photo { animation-delay: .12s; }
-          @keyframes mn-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+          .mn-hero-copy { animation: mn-up .9s ease both; }
+          .mn-photo-wrap { animation: mn-up .9s .15s ease both; }
+          @keyframes mn-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         }
       `}</style>
 
+      {/* ── HERO ── */}
       <header className="mn-hero">
-        <div className="mn-hero-copy">
-          <p className="mn-opening">In the name of Allah, the Most Gracious, the Most Merciful</p>
-          <h1 className="mn-serif mn-names">Ahmad<span>&amp; Toyibat</span></h1>
-          <p className="mn-hero-note">A solemnization of marriage, held with gratitude, faith and the presence of those we love.</p>
+        <div className="mn-hero-copy mn-wrap" style={{ maxWidth: 'none' }}>
+          <p className="mn-bismillah">In the name of Allah,<br />the Most Gracious, the Most Merciful</p>
+          <h1 className="mn-serif mn-names">
+            Ahmad
+            <em className="mn-amp">&amp;</em>
+            Toyibat
+          </h1>
+          <p className="mn-hero-sub">A Nikah ceremony held in faith, love and the warmth of family — Ijebu Ode, Nigeria</p>
         </div>
-        <div className="mn-photo">
+        <div className="mn-photo-wrap">
           <img src="/__mockup/images/couple.png" alt="Ahmad Opeyemi and Toyibat Adeola" />
         </div>
       </header>
 
+      {/* ── GOLD BAND ── */}
+      <div className="mn-band">
+        <p className="mn-band-text">Saturday · 21st November 2026 · Rolak Hotel &amp; Suites · Ijebu Ode</p>
+      </div>
+
       <main>
-        <section className="mn-wrap mn-section">
-          <div className="mn-intro">
-            <div className="mn-intro-label">
-              <p className="mn-kicker">With the blessing of</p>
-              <p className="mn-kicker" style={{ color: 'var(--ink)', marginTop: 16 }}>Two families</p>
+        {/* ── INVITATION ── */}
+        <section className="mn-invite mn-wrap">
+          <div className="mn-invite-inner">
+            <div className="mn-invite-label">
+              <p className="mn-kicker">With the blessings of</p>
+              <p className="mn-kicker" style={{ color: 'var(--ink)', marginTop: 14 }}>Two families</p>
             </div>
             <blockquote className="mn-serif mn-quote">
-              The families of <em>Prof Taofiki &amp; Alhaja Basirat Salako</em> and <em>Khalifah Abdul-Hafeez &amp; Alhaja Kudratu-Llah Otunuyi</em> invite <em>V.C. TASUED (Prof. Banjo)</em> to witness the solemnization of <em>Ahmad Opeyemi &amp; Toyibat Adeola.</em>
+              The families of <em>Prof Taofiki &amp; Alhaja Basirat Salako</em> and <em>Khalifah Abdul-Hafeez &amp; Alhaja Kudratu-Llah Otunuyi</em> joyfully invite <em>V.C. TASUED (Prof. Banjo)</em> to witness the Nikah of <em>Ahmad Opeyemi &amp; Toyibat Adeola.</em>
             </blockquote>
           </div>
-          <div className="mn-details">
-            <div><span className="mn-detail-label">Date</span><span className="mn-detail-value">Saturday, 21st November 2026</span></div>
-            <div><span className="mn-detail-label">Time</span><span className="mn-detail-value">11:00 AM</span></div>
-            <div><span className="mn-detail-label">Venue</span><span className="mn-detail-value">Rolak Hotel and Suites, Adetola Hall, Imowo Eleran, Ijebu Ode</span></div>
-          </div>
-        </section>
 
-        <section className="mn-wrap mn-section mn-event">
-          <h2 className="mn-serif mn-event-title">The day,<br />in full.</h2>
-          <div className="mn-event-copy">
-            <p><strong>Reception:</strong> follows immediately at the same venue.</p>
-            <p><strong>Directions:</strong> From Lagos Garage to Rolak Hotel &amp; Suites — Beside Imowo Community Primary School, Ijebu Ode, Ogun State</p>
-            <div className="mn-countdown" aria-label="Countdown to the nikah">
-              {countdown ? Object.entries(countdown).map(([label, value]) => (
-                <div className="mn-count-item" key={label}>
-                  <span className="mn-count-number">{twoDigits(value)}</span>
-                  <span className="mn-count-label">{label}</span>
-                </div>
-              )) : <span className="mn-detail-value">The day has arrived.</span>}
+          {/* Details */}
+          <div className="mn-details-strip" style={{ marginLeft: 'calc(-1 * clamp(20px, 5vw, 72px))', marginRight: 'calc(-1 * clamp(20px, 5vw, 72px))', paddingLeft: 'clamp(20px, 5vw, 72px)', paddingRight: 'clamp(20px, 5vw, 72px)' }}>
+            <div className="mn-details-grid">
+              <div>
+                <span className="mn-detail-label">Date</span>
+                <span className="mn-detail-value"><strong>Saturday</strong>, 21st November 2026</span>
+              </div>
+              <div>
+                <span className="mn-detail-label">Time</span>
+                <span className="mn-detail-value">11:00 AM</span>
+              </div>
+              <div>
+                <span className="mn-detail-label">Venue</span>
+                <span className="mn-detail-value"><strong>Rolak Hotel &amp; Suites</strong> — Adetola Hall, Imowo Eleran, Ijebu Ode, Ogun State</span>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mn-wrap mn-verse">
-          <p className="mn-kicker">A verse for the day</p>
-          <blockquote className="mn-serif">“And among His signs is this, that He created for you mates from among yourselves, that you may dwell in tranquility with, and He has put love and mercy between your hearts. Verily in that are signs for those who reflect.”</blockquote>
-          <p className="mn-attribution">— Al-Rum (30:21)</p>
-          <p className="mn-serif mn-toast">Love brought us together. Faith keeps us together. But God made it possible. It is marvellous in our eyes.<cite>— Ahmad &amp; Toyibat</cite></p>
+        {/* ── PROGRAMME ── */}
+        <section className="mn-wrap mn-programme">
+          <div>
+            <p className="mn-kicker">Programme</p>
+            <h2 className="mn-serif mn-prog-title">The<br />day,<br />in full.</h2>
+          </div>
+          <div className="mn-prog-body">
+            <p><strong>Nikah Ceremony</strong><br />Commences at 11:00 AM at Rolak Hotel &amp; Suites, Adetola Hall, with readings, prayers and the solemnisation of marriage.</p>
+            <p><strong>Reception</strong><br />Follows immediately at the same venue. Food, music and celebration with family and friends.</p>
+            <p><strong>Directions</strong><br />From Lagos Garage → Rolak Hotel &amp; Suites, beside Imowo Community Primary School, Ijebu Ode, Ogun State.</p>
+
+            {/* Countdown */}
+            {countdown && (
+              <div className="mn-countdown" aria-label="Countdown to the Nikah">
+                {Object.entries(countdown).map(([label, value]) => (
+                  <div className="mn-count-item" key={label}>
+                    <span className="mn-count-number">{twoDigits(value)}</span>
+                    <span className="mn-count-label">{label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!countdown && <p style={{ marginTop: 40, color: 'var(--emerald)', fontWeight: 600 }}>The day has arrived. Barak Allahu Lakuma.</p>}
+          </div>
         </section>
 
+        {/* ── VERSE ── */}
+        <section className="mn-verse">
+          <div className="mn-wrap">
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 18, marginBottom: 20 }}>
+              <StarMotif color="#c9a84c" size={40} />
+              <StarMotif color="#c9a84c" size={40} />
+              <StarMotif color="#c9a84c" size={40} />
+            </div>
+            <p className="mn-kicker">A verse for the occasion</p>
+            <blockquote className="mn-serif">
+              "And among His signs is this, that He created for you mates from among yourselves, that you may dwell in tranquility with them, and He has put love and mercy between your hearts. Verily in that are signs for those who reflect."
+            </blockquote>
+            <p className="mn-attribution">— Al-Rum 30:21</p>
+            <p className="mn-serif mn-couple-note">
+              Love brought us together. Faith keeps us together.<br />God made it all possible.
+              <cite>— Ahmad &amp; Toyibat</cite>
+            </p>
+          </div>
+        </section>
+
+        {/* ── RSVP ── */}
         <section className="mn-wrap mn-rsvp">
           <div className="mn-rsvp-head">
-          <div><p className="mn-kicker">Kindly respond</p><h2 className="mn-serif mn-rsvp-title">RSVP.</h2></div>
-            <p className="mn-dress"><strong>Dress code</strong><br />Bride — Emerald Green<br />Groom — Champagne Gold</p>
+            <div>
+              <p className="mn-kicker">Kindly respond</p>
+              <h2 className="mn-serif mn-rsvp-title">RSVP.</h2>
+            </div>
+            <p className="mn-dress">
+              <strong>Aso-Ebi / Dress Code</strong>
+              <span className="bride">Bride's side — Emerald Green</span>
+              <span className="groom">Groom's side — Champagne Gold</span>
+            </p>
           </div>
           <div className="mn-contacts">
-            {rsvpContacts.map(([name, phone]) => <a className="mn-contact" href={`tel:${phone}`} key={phone}><span>{name}</span><span>{phone}</span></a>)}
+            {rsvpContacts.map(([name, phone]) => (
+              <a className="mn-contact" href={`tel:${phone}`} key={phone}>
+                <span className="mn-contact-name">{name}</span>
+                <span className="mn-contact-num">{phone}</span>
+              </a>
+            ))}
           </div>
         </section>
       </main>
+
+      {/* ── FOOTER ── */}
+      <footer className="mn-footer">
+        <p>Ahmad Opeyemi &amp; Toyibat Adeola · 21 November 2026 · Ijebu Ode, Nigeria</p>
+      </footer>
     </div>
   );
 }
