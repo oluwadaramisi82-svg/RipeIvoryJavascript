@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator | Ahmad & Toyibat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --emerald: #0b4435;
+      --emerald-dark: #051d12;
+      --gold: #c4a24e;
+      --gold-warm: #d4b46c;
+      --gold-light: #ecdcaa;
+      --ivory: #fdfcf8;
+      --cream: #f5f1e6;
+      --ink: #18281e;
+      --muted: #5a6862;
+      --line-gold: rgba(196,162,78,.32);
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --sans: "Montserrat", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse 90% 70% at 50% 30%, #0d3324 0%, #061910 55%, #020b06 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 24px 64px;
+      font-family: var(--sans);
+      color: var(--ivory);
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .monogram {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px; height: 56px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      margin-bottom: 20px;
+      color: var(--gold);
+      font: 600 1.1rem/1 var(--serif);
+      letter-spacing: .06em;
+    }
+
+    .header h1 {
+      font: 700 2rem/1.2 var(--serif);
+      color: var(--gold-light);
+      letter-spacing: .04em;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font: 400 .78rem/1.6 var(--sans);
+      color: rgba(253,252,248,.55);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--ivory);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 32px 90px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.2);
+      color: var(--ink);
+    }
+
+    .card label {
+      display: block;
+      font: 600 .7rem/1 var(--sans);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .card input[type="text"] {
+      flex: 1;
+      padding: 13px 16px;
+      border: 1.5px solid var(--line-gold);
+      border-radius: 8px;
+      background: var(--cream);
+      font: 500 1rem/1 var(--sans);
+      color: var(--ink);
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .card input[type="text"]:focus {
+      border-color: var(--gold);
+    }
+
+    .card input[type="text"]::placeholder {
+      color: #aab5b0;
+    }
+
+    .btn-generate {
+      padding: 13px 20px;
+      background: var(--emerald);
+      color: var(--gold-light);
+      border: none;
+      border-radius: 8px;
+      font: 600 .78rem/1 var(--sans);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, transform .1s;
+    }
+
+    .btn-generate:hover { background: #0e5240; }
+    .btn-generate:active { transform: scale(.97); }
+
+    /* ── QR output ── */
+    .qr-output {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .qr-output.visible { display: flex; }
+
+    .qr-frame {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 24px rgba(11,68,53,.12);
+    }
+
+    /* Corner accents */
+    .qr-frame::before,
+    .qr-frame::after {
+      content: "";
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--gold);
+      border-style: solid;
+    }
+    .qr-frame::before {
+      top: 8px; left: 8px;
+      border-width: 2px 0 0 2px;
+      border-radius: 3px 0 0 0;
+    }
+    .qr-frame::after {
+      bottom: 8px; right: 8px;
+      border-width: 0 2px 2px 0;
+      border-radius: 0 0 3px 0;
+    }
+
+    #qr-canvas {
+      display: block;
+      border-radius: 4px;
+    }
+
+    .qr-caption {
+      text-align: center;
+    }
+
+    .qr-caption .guest-name {
+      font: 600 1.15rem/1 var(--serif);
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .qr-caption .qr-url {
+      font: 400 .7rem/1.5 var(--sans);
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    /* ── Action buttons ── */
+    .actions {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .btn-action {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 16px;
+      border-radius: 8px;
+      font: 600 .72rem/1 var(--sans);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: background .2s, transform .1s;
+    }
+
+    .btn-action:active { transform: scale(.97); }
+
+    .btn-download {
+      background: var(--emerald);
+      color: var(--gold-light);
+    }
+
+    .btn-download:hover { background: #0e5240; }
+
+    .btn-print {
+      background: var(--cream);
+      color: var(--emerald);
+      border: 1.5px solid var(--line-gold);
+    }
+
+    .btn-print:hover { background: #ece8d9; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line-gold);
+    }
+    .divider span {
+      font: 400 .65rem/1 var(--sans);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Batch section ── */
+    .batch-section {
+      margin-top: 32px;
+    }
+
+    .batch-section label {
+      display: block;
+      font: 600 .7rem/1 var(--sans);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .batch-section textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 12px 16px;
+      border: 1.5px solid var(--line-gold);
+      border-radius: 8px;
+      background: var(--cream);
+      font: 400 .88rem/1.6 var(--sans);
+      color: var(--ink);
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 12px;
+    }
+
+    .batch-section textarea:focus { border-color: var(--gold); }
+    .batch-section textarea::placeholder { color: #aab5b0; }
+
+    .btn-batch {
+      width: 100%;
+      padding: 13px;
+      background: var(--cream);
+      color: var(--emerald);
+      border: 1.5px solid var(--line-gold);
+      border-radius: 8px;
+      font: 600 .72rem/1 var(--sans);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+    .btn-batch:hover { background: #ece8d9; }
+    .btn-batch:active { transform: scale(.98); }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font: 400 .68rem/1.6 var(--sans);
+      color: rgba(253,252,248,.35);
+      letter-spacing: .06em;
+    }
+
+    .footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      body { background: white; padding: 0; }
+      .header, .card > *:not(.qr-output), .btn-action.btn-download, .btn-action.btn-print,
+      .footer, .batch-section, .divider, .actions { display: none !important; }
+      .qr-output { display: flex !important; align-items: center; }
+      .qr-frame { box-shadow: none; border: 1px solid #ddd; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="monogram">A&T</div>
+    <h1>Guest QR Codes</h1>
+    <p>Ahmad &amp; Toyibat · Wedding Invitation</p>
+  </div>
+
+  <div class="card">
+
+    <!-- Single guest -->
+    <label for="guest-input">Guest name</label>
+    <div class="input-row">
+      <input
+        type="text"
+        id="guest-input"
+        placeholder="e.g. Uncle Rasheed"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="btn-generate" onclick="generateQR()">Generate</button>
+    </div>
+
+    <!-- QR output -->
+    <div class="qr-output" id="qr-output">
+      <div class="qr-frame">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+      <div class="qr-caption">
+        <div class="guest-name" id="qr-guest-label"></div>
+        <div class="qr-url" id="qr-url-label"></div>
+      </div>
+      <div class="actions">
+        <button class="btn-action btn-download" onclick="downloadQR()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 1v9M4.5 6.5 8 10l3.5-3.5M2 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Download
+        </button>
+        <button class="btn-action btn-print" onclick="window.print()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="3" y="1" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="3" y="9" width="10" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M5 12h6M5 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <rect x="1" y="6" width="14" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          Print
+        </button>
+      </div>
+    </div>
+
+    <!-- Batch section -->
+    <div class="batch-section">
+      <div class="divider"><span>or generate multiple</span></div>
+      <label for="batch-input">Guest list (one name per line)</label>
+      <textarea
+        id="batch-input"
+        placeholder="Aunty Fatima&#10;Uncle Rasheed&#10;Cousin Maryam"
+      ></textarea>
+      <button class="btn-batch" onclick="downloadBatch()">Download all as ZIP</button>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <a href="/">← Back to invitation</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const BASE_URL = 'https://ripe-ivory-javascript.replit.app/';
+
+    function buildUrl(name) {
+      return BASE_URL + '?to=' + encodeURIComponent(name);
+    }
+
+    async function renderQRToCanvas(canvas, url) {
+      await QRCode.toCanvas(canvas, url, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#0b4435',
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'M'
+      });
+    }
+
+    async function generateQR() {
+      const name = document.getElementById('guest-input').value.trim();
+      if (!name) {
+        document.getElementById('guest-input').focus();
+        return;
+      }
+
+      const url = buildUrl(name);
+      const canvas = document.getElementById('qr-canvas');
+
+      await renderQRToCanvas(canvas, url);
+
+      document.getElementById('qr-guest-label').textContent = name;
+      document.getElementById('qr-url-label').textContent = url;
+      document.getElementById('qr-output').classList.add('visible');
+    }
+
+    function downloadQR() {
+      const name = document.getElementById('guest-input').value.trim();
+      const canvas = document.getElementById('qr-canvas');
+      const link = document.createElement('a');
+      link.download = 'invitation-qr-' + name.replace(/\s+/g, '-').toLowerCase() + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    async function downloadBatch() {
+      const raw = document.getElementById('batch-input').value;
+      const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
+
+      if (names.length === 0) {
+        document.getElementById('batch-input').focus();
+        return;
+      }
+
+      const btn = document.querySelector('.btn-batch');
+      btn.textContent = 'Generating…';
+      btn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        const offscreen = document.createElement('canvas');
+
+        for (const name of names) {
+          const url = buildUrl(name);
+          await renderQRToCanvas(offscreen, url);
+          const blob = await new Promise(res => offscreen.toBlob(res, 'image/png'));
+          zip.file('invitation-qr-' + name.replace(/\s+/g, '-').toLowerCase() + '.png', blob);
+        }
+
+        const content = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = 'ahmad-toyibat-qr-codes.zip';
+        link.click();
+      } finally {
+        btn.textContent = 'Download all as ZIP';
+        btn.disabled = false;
+      }
+    }
+
+    // Allow Enter key to generate
+    document.getElementById('guest-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') generateQR();
+    });
+  </script>
+</body>
+</html>
