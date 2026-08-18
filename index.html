@@ -1304,13 +1304,15 @@
           await navigator.clipboard.write([
             new ClipboardItem({
               "text/html": new Blob([html], { type: "text/html" }),
-              "text/plain": new Blob([label], { type: "text/plain" }),
+              // WhatsApp and other plain-text apps need the real URL to make
+              // the pasted content clickable.
+              "text/plain": new Blob([link], { type: "text/plain" }),
             }),
           ]);
           return;
         }
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(label);
+          await navigator.clipboard.writeText(link);
           return;
         }
         throw new Error("Clipboard unavailable");
@@ -1330,7 +1332,7 @@
         };
         const fallbackCopy = () => {
           const tmp = document.createElement("input");
-          tmp.value = "T&A 2026";
+          tmp.value = link;
           tmp.setAttribute("readonly", "");
           tmp.style.position = "fixed";
           tmp.style.opacity = "0";
