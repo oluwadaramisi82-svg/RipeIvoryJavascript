@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "UMGcUxT2sK3igEptSYjaD"
+uri = "file://promo/music.mp3"
+type = "audio"
+title = "wedding promo bed"
+description = "Generated music: Elegant romantic wedding instrumental, warm strings and soft piano with gentle West African kora accents, uplifting and heartfelt, builds gently to a joyful swell, cinematic promo be…"
+
+[[outputs]]
+id = "3e3DQemXYbrILW9hVjtgm"
+uri = "file://attached_assets/generated_videos/ahmad-toyibat-promo.mp4"
+type = "video"
+title = "Ahmad & Toyibat — Wedding Promo Reel"
+description = "40-second portrait (9:16) promo video with the couple's photos, wedding details, and original instrumental music — ready to share on WhatsApp status and Instagram stories."
