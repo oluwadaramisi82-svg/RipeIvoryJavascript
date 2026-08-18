@@ -98,7 +98,7 @@ export function ModernNikah() {
       ),
       right: (
         <div className="page-cover page-cover-right">
-          <img src="/__mockup/images/couple.png" alt="Ahmad and Toyibat" className="cover-photo" />
+          <img src="/__mockup/images/couple4.png" alt="Ahmad and Toyibat" className="cover-photo" />
           <div className="cover-photo-caption mn-serif">Ahmad Opeyemi &amp; Toyibat Adeola</div>
         </div>
       ),
