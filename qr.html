@@ -2,91 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Code Generator | Ahmad & Toyibat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Guest QR Codes | Ahmad &amp; Toyibat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     :root {
-      --emerald: #0b4435;
-      --emerald-dark: #051d12;
-      --gold: #c4a24e;
-      --gold-warm: #d4b46c;
-      --gold-light: #ecdcaa;
-      --ivory: #fdfcf8;
-      --cream: #f5f1e6;
-      --ink: #18281e;
-      --muted: #5a6862;
-      --line-gold: rgba(196,162,78,.32);
+      --emerald: #0d4b3a;
+      --emerald-dark: #07372b;
+      --emerald-soft: #1c6651;
+      --gold: #d7b66c;
+      --gold-light: #f1dfad;
+      --ivory: #fffdf8;
+      --cream: #f8f5ed;
+      --ink: #21332d;
+      --muted: #68766e;
+      --line: rgba(13,75,58,.16);
+      --line-gold: rgba(215,182,108,.28);
       --serif: "Cormorant Garamond", Georgia, serif;
       --sans: "Montserrat", Arial, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+    a, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
     body {
       min-height: 100vh;
-      background: radial-gradient(ellipse 90% 70% at 50% 30%, #0d3324 0%, #061910 55%, #020b06 100%);
+      background: linear-gradient(172deg, #0d4b3a 0%, #07372b 60%, #07372b 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 48px 24px 64px;
+      padding: 56px 24px 72px;
       font-family: var(--sans);
       color: var(--ivory);
+      /* Subtle diagonal lattice matching the invitation hero */
+      background-image:
+        linear-gradient(172deg, #0d4b3a 0%, #07372b 60%, #07372b 100%),
+        repeating-linear-gradient(
+          -45deg,
+          transparent 0px, transparent 32px,
+          rgba(215,182,108,.04) 32px, rgba(215,182,108,.04) 33px
+        );
+      background-blend-mode: normal;
     }
 
-    /* ── Header ── */
+    /* ── Header ────────────────────────────────────────────── */
     .header {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 52px;
     }
 
+    /* Monogram ring — mirrors the hero monogram */
     .monogram {
       display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 56px; height: 56px;
-      border: 1.5px solid var(--gold);
+      align-items: center; justify-content: center;
+      width: 64px; height: 64px;
+      border: 1px solid rgba(215,182,108,.5);
       border-radius: 50%;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       color: var(--gold);
-      font: 600 1.1rem/1 var(--serif);
-      letter-spacing: .06em;
+      font: 500 1.35rem/1 var(--serif);
+      letter-spacing: .03em;
+      position: relative;
+    }
+    .monogram::before {
+      content: ""; position: absolute;
+      inset: -6px; border-radius: 50%;
+      border: 1px solid rgba(215,182,108,.18);
     }
 
     .header h1 {
-      font: 700 2rem/1.2 var(--serif);
-      color: var(--gold-light);
-      letter-spacing: .04em;
-      margin-bottom: 8px;
+      font: 500 2.8rem/1.1 var(--serif);
+      color: var(--ivory);
+      letter-spacing: .02em;
+      margin-bottom: 10px;
     }
 
     .header p {
-      font: 400 .78rem/1.6 var(--sans);
-      color: rgba(253,252,248,.55);
-      letter-spacing: .08em;
+      font: 400 .68rem/1.6 var(--sans);
+      color: rgba(241,223,173,.55);
+      letter-spacing: 2.5px;
       text-transform: uppercase;
     }
 
-    /* ── Card ── */
+    /* ── Card ─────────────────────────────────────────────── */
     .card {
       background: var(--ivory);
-      border-radius: 16px;
-      padding: 40px 36px;
+      padding: 44px 40px;
       width: 100%;
-      max-width: 480px;
-      box-shadow: 0 32px 90px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.2);
+      max-width: 500px;
+      /* Matches invitation card: outer gold border + inner inset */
+      border: 1px solid rgba(215,182,108,.4);
+      position: relative;
+      box-shadow: 0 32px 80px rgba(7,55,43,.35), 0 2px 8px rgba(7,55,43,.18);
       color: var(--ink);
     }
+    /* Inner frame rule */
+    .card::before {
+      content: ""; position: absolute; inset: 12px;
+      border: 1px solid rgba(215,182,108,.16);
+      pointer-events: none;
+    }
 
-    .card label {
+    .card > label,
+    .batch-section > label {
       display: block;
-      font: 600 .7rem/1 var(--sans);
-      letter-spacing: .12em;
+      font: 600 .6rem/1 var(--sans);
+      letter-spacing: 2.2px;
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 10px;
@@ -95,244 +121,174 @@
     .input-row {
       display: flex;
       gap: 10px;
-      margin-bottom: 32px;
+      margin-bottom: 34px;
     }
 
     .card input[type="text"] {
       flex: 1;
-      padding: 13px 16px;
-      border: 1.5px solid var(--line-gold);
-      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid var(--line-gold);
+      border-radius: 0;
       background: var(--cream);
-      font: 500 1rem/1 var(--sans);
+      font: 500 .95rem/1 var(--sans);
       color: var(--ink);
       outline: none;
       transition: border-color .2s;
     }
-
-    .card input[type="text"]:focus {
-      border-color: var(--gold);
-    }
-
-    .card input[type="text"]::placeholder {
-      color: #aab5b0;
-    }
+    .card input[type="text"]:focus { border-color: var(--gold); }
+    .card input[type="text"]::placeholder { color: #aab5b0; }
 
     .btn-generate {
-      padding: 13px 20px;
+      padding: 12px 20px;
       background: var(--emerald);
       color: var(--gold-light);
       border: none;
-      border-radius: 8px;
-      font: 600 .78rem/1 var(--sans);
-      letter-spacing: .08em;
+      border-radius: 0;
+      font: 600 .65rem/1 var(--sans);
+      letter-spacing: 1.8px;
       text-transform: uppercase;
       cursor: pointer;
       white-space: nowrap;
-      transition: background .2s, transform .1s;
+      transition: background .2s;
     }
+    .btn-generate:hover { background: var(--emerald-soft); }
 
-    .btn-generate:hover { background: #0e5240; }
-    .btn-generate:active { transform: scale(.97); }
-
-    /* ── QR output ── */
+    /* ── QR output ────────────────────────────────────────── */
     .qr-output {
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 22px;
     }
-
     .qr-output.visible { display: flex; }
 
     .qr-frame {
       position: relative;
       background: white;
-      border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 4px 24px rgba(11,68,53,.12);
+      border: 1px solid var(--line-gold);
     }
+    /* Corner gold accents */
+    .qr-frame::before, .qr-frame::after {
+      content: ""; position: absolute;
+      width: 18px; height: 18px;
+      border-color: var(--gold); border-style: solid;
+    }
+    .qr-frame::before { top: 7px; left: 7px; border-width: 1.5px 0 0 1.5px; }
+    .qr-frame::after  { bottom: 7px; right: 7px; border-width: 0 1.5px 1.5px 0; }
 
-    /* Corner accents */
-    .qr-frame::before,
-    .qr-frame::after {
-      content: "";
-      position: absolute;
-      width: 20px; height: 20px;
-      border-color: var(--gold);
-      border-style: solid;
-    }
-    .qr-frame::before {
-      top: 8px; left: 8px;
-      border-width: 2px 0 0 2px;
-      border-radius: 3px 0 0 0;
-    }
-    .qr-frame::after {
-      bottom: 8px; right: 8px;
-      border-width: 0 2px 2px 0;
-      border-radius: 0 0 3px 0;
-    }
+    #qr-canvas { display: block; }
 
-    #qr-canvas {
-      display: block;
-      border-radius: 4px;
-    }
-
-    .qr-caption {
-      text-align: center;
-    }
-
+    .qr-caption { text-align: center; }
     .qr-caption .guest-name {
-      font: 600 1.15rem/1 var(--serif);
-      color: var(--ink);
-      margin-bottom: 4px;
+      font: 600 1.25rem/1 var(--serif);
+      color: var(--emerald);
+      margin-bottom: 5px;
     }
-
     .qr-caption .qr-url {
-      font: 400 .7rem/1.5 var(--sans);
+      font: 400 .68rem/1.5 var(--sans);
       color: var(--muted);
       word-break: break-all;
     }
 
-    /* ── Action buttons ── */
+    /* ── Action buttons ───────────────────────────────────── */
     .actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       width: 100%;
     }
-
     .btn-action {
       flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       gap: 8px;
-      padding: 13px 16px;
-      border-radius: 8px;
-      font: 600 .72rem/1 var(--sans);
-      letter-spacing: .08em;
+      padding: 13px 14px;
+      border-radius: 0;
+      font: 600 .65rem/1 var(--sans);
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      cursor: pointer;
-      border: none;
-      transition: background .2s, transform .1s;
+      cursor: pointer; border: none;
+      transition: background .2s;
     }
-
-    .btn-action:active { transform: scale(.97); }
-
-    .btn-download {
-      background: var(--emerald);
-      color: var(--gold-light);
-    }
-
-    .btn-download:hover { background: #0e5240; }
-
-    .btn-print {
-      background: var(--cream);
-      color: var(--emerald);
-      border: 1.5px solid var(--line-gold);
-    }
-
+    .btn-download { background: var(--emerald); color: var(--gold-light); }
+    .btn-download:hover { background: var(--emerald-soft); }
+    .btn-print { background: var(--cream); color: var(--emerald); border: 1px solid var(--line-gold); }
     .btn-print:hover { background: #ece8d9; }
 
-    /* ── Divider ── */
+    /* ── Divider ──────────────────────────────────────────── */
     .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 14px;
+      margin: 32px 0 24px;
     }
-    .divider::before,
-    .divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
+    .divider::before, .divider::after {
+      content: ""; flex: 1; height: 1px;
       background: var(--line-gold);
     }
     .divider span {
-      font: 400 .65rem/1 var(--sans);
-      letter-spacing: .1em;
-      text-transform: uppercase;
+      font: 400 .6rem/1 var(--sans);
+      letter-spacing: 1.8px; text-transform: uppercase;
       color: var(--muted);
     }
 
-    /* ── Batch section ── */
-    .batch-section {
-      margin-top: 32px;
-    }
-
-    .batch-section label {
-      display: block;
-      font: 600 .7rem/1 var(--sans);
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
+    /* ── Batch section ────────────────────────────────────── */
     .batch-section textarea {
       width: 100%;
-      min-height: 90px;
-      padding: 12px 16px;
-      border: 1.5px solid var(--line-gold);
-      border-radius: 8px;
+      min-height: 88px;
+      padding: 12px 14px;
+      border: 1px solid var(--line-gold);
+      border-radius: 0;
       background: var(--cream);
       font: 400 .88rem/1.6 var(--sans);
       color: var(--ink);
-      resize: vertical;
-      outline: none;
+      resize: vertical; outline: none;
       transition: border-color .2s;
       margin-bottom: 12px;
     }
-
     .batch-section textarea:focus { border-color: var(--gold); }
     .batch-section textarea::placeholder { color: #aab5b0; }
 
     .btn-batch {
-      width: 100%;
-      padding: 13px;
-      background: var(--cream);
-      color: var(--emerald);
-      border: 1.5px solid var(--line-gold);
-      border-radius: 8px;
-      font: 600 .72rem/1 var(--sans);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
+      width: 100%; padding: 13px;
+      background: var(--cream); color: var(--emerald);
+      border: 1px solid var(--line-gold); border-radius: 0;
+      font: 600 .65rem/1 var(--sans);
+      letter-spacing: 1.8px; text-transform: uppercase;
+      cursor: pointer; transition: background .2s;
     }
     .btn-batch:hover { background: #ece8d9; }
-    .btn-batch:active { transform: scale(.98); }
 
-    /* ── Footer ── */
+    /* ── Footer ───────────────────────────────────────────── */
     .footer {
-      margin-top: 40px;
-      text-align: center;
-      font: 400 .68rem/1.6 var(--sans);
-      color: rgba(253,252,248,.35);
-      letter-spacing: .06em;
+      margin-top: 42px; text-align: center;
+      font: 400 .65rem/1.6 var(--sans);
+      color: rgba(241,223,173,.4);
+      letter-spacing: 1.5px; text-transform: uppercase;
     }
+    .footer a { color: var(--gold); text-decoration: none; }
+    .footer a:hover { color: var(--gold-light); }
 
-    .footer a {
-      color: var(--gold);
-      text-decoration: none;
-    }
-
-    /* ── Print styles ── */
+    /* ── Print styles ─────────────────────────────────────── */
     @media print {
       body { background: white; padding: 0; }
-      .header, .card > *:not(.qr-output), .btn-action.btn-download, .btn-action.btn-print,
+      .header, .card > *:not(.qr-output), .btn-action,
       .footer, .batch-section, .divider, .actions { display: none !important; }
       .qr-output { display: flex !important; align-items: center; }
       .qr-frame { box-shadow: none; border: 1px solid #ddd; }
+    }
+
+    @media (max-width: 540px) {
+      body { padding: 40px 16px 60px; }
+      .card { padding: 32px 20px; }
+      .header h1 { font-size: 2.2rem; }
+      .actions { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <div class="monogram">A&T</div>
+    <div class="monogram">T&amp;A</div>
     <h1>Guest QR Codes</h1>
-    <p>Ahmad &amp; Toyibat · Wedding Invitation</p>
+    <p>Ahmad &amp; Toyibat &nbsp;·&nbsp; Wedding Invitation</p>
   </div>
 
   <div class="card">
@@ -361,13 +317,13 @@
       </div>
       <div class="actions">
         <button class="btn-action btn-download" onclick="downloadQR()">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M8 1v9M4.5 6.5 8 10l3.5-3.5M2 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Download
         </button>
         <button class="btn-action btn-print" onclick="window.print()">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <rect x="3" y="1" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.6"/>
             <rect x="3" y="9" width="10" height="6" rx="1" stroke="currentColor" stroke-width="1.6"/>
             <path d="M5 12h6M5 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
@@ -397,7 +353,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
-    const BASE_URL = 'https://ripe-ivory-javascript.replit.app/';
+    const BASE_URL = window.location.origin + '/';
 
     function buildUrl(name) {
       return BASE_URL + '?to=' + encodeURIComponent(name);
@@ -405,28 +361,19 @@
 
     async function renderQRToCanvas(canvas, url) {
       await QRCode.toCanvas(canvas, url, {
-        width: 256,
+        width: 240,
         margin: 2,
-        color: {
-          dark: '#0b4435',
-          light: '#ffffff'
-        },
+        color: { dark: '#0d4b3a', light: '#ffffff' },
         errorCorrectionLevel: 'M'
       });
     }
 
     async function generateQR() {
       const name = document.getElementById('guest-input').value.trim();
-      if (!name) {
-        document.getElementById('guest-input').focus();
-        return;
-      }
-
+      if (!name) { document.getElementById('guest-input').focus(); return; }
       const url = buildUrl(name);
       const canvas = document.getElementById('qr-canvas');
-
       await renderQRToCanvas(canvas, url);
-
       document.getElementById('qr-guest-label').textContent = name;
       document.getElementById('qr-url-label').textContent = url;
       document.getElementById('qr-output').classList.add('visible');
@@ -444,11 +391,7 @@
     async function downloadBatch() {
       const raw = document.getElementById('batch-input').value;
       const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
-
-      if (names.length === 0) {
-        document.getElementById('batch-input').focus();
-        return;
-      }
+      if (names.length === 0) { document.getElementById('batch-input').focus(); return; }
 
       const btn = document.querySelector('.btn-batch');
       btn.textContent = 'Generating…';
@@ -457,18 +400,15 @@
       try {
         const zip = new JSZip();
         const offscreen = document.createElement('canvas');
-
         for (const name of names) {
-          const url = buildUrl(name);
-          await renderQRToCanvas(offscreen, url);
+          await renderQRToCanvas(offscreen, buildUrl(name));
           const blob = await new Promise(res => offscreen.toBlob(res, 'image/png'));
           zip.file('invitation-qr-' + name.replace(/\s+/g, '-').toLowerCase() + '.png', blob);
         }
-
         const content = await zip.generateAsync({ type: 'blob' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
-        link.download = 'ahmad-toyibat-qr-codes.zip';
+        link.download = 'ta-wedding-qr-codes.zip';
         link.click();
       } finally {
         btn.textContent = 'Download all as ZIP';
@@ -476,7 +416,6 @@
       }
     }
 
-    // Allow Enter key to generate
     document.getElementById('guest-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') generateQR();
     });
