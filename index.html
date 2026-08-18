@@ -148,7 +148,7 @@
       pointer-events: none;
     }
     .envelope-front-mark .mark-monogram {
-      display: inline-flex;
+      display: none;
       width: 36px; height: 36px;
       align-items: center; justify-content: center;
       margin-bottom: 7px;
@@ -158,8 +158,9 @@
       letter-spacing: .02em;
     }
     .envelope-front-mark strong {
-      font: 500 1.05rem/1 var(--serif);
-      letter-spacing: .06em;
+      font: 500 1.28rem/1 var(--serif);
+      letter-spacing: .08em;
+      text-shadow: 0 1px 10px rgba(0,0,0,.18);
     }
     .envelope-front-mark small {
       margin-top: 5px;
@@ -485,6 +486,11 @@
     .photo-slide:nth-child(3) {
       /* Keep both faces and the pink backdrop balanced in the tighter frame. */
       object-position: center 42%;
+      outline: none;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      clip-path: inset(2px);
     }
     @keyframes photoFade {
       0%      { opacity: 0; }
