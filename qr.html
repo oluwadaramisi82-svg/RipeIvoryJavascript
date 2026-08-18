@@ -191,6 +191,13 @@
       color: var(--muted);
       word-break: break-all;
     }
+    .qr-caption .qr-brand {
+      margin-bottom: 5px;
+      color: var(--gold);
+      font: 600 .62rem/1 var(--sans);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
 
     /* ── Action buttons ───────────────────────────────────── */
     .actions {
@@ -314,6 +321,7 @@
       </div>
       <div class="qr-caption">
         <div class="guest-name" id="qr-guest-label"></div>
+          <div class="qr-brand">T&amp;A 2026 · Personalised Invitation</div>
         <div class="qr-url" id="qr-url-label"></div>
       </div>
       <div class="actions">
@@ -370,8 +378,31 @@
         width: 240,
         margin: 2,
         color: { dark: '#0d4b3a', light: '#ffffff' },
-        errorCorrectionLevel: 'M'
+        errorCorrectionLevel: 'H'
       });
+      // Add a compact T&A 2026 mark in the centre. High error correction keeps
+      // the personalised QR readable after the mark is placed over the code.
+      const ctx = canvas.getContext('2d');
+      const markWidth = 72;
+      const markHeight = 34;
+      const x = (canvas.width - markWidth) / 2;
+      const y = (canvas.height - markHeight) / 2;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(x, y, markWidth, markHeight, 7);
+      ctx.fill();
+      ctx.strokeStyle = '#d7b66c';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = '#0d4b3a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '600 13px Georgia, serif';
+      ctx.fillText('T&A', canvas.width / 2, y + 13);
+      ctx.fillStyle = '#8b6b2d';
+      ctx.font = '600 7px Montserrat, Arial, sans-serif';
+      ctx.letterSpacing = '1px';
+      ctx.fillText('2026', canvas.width / 2, y + 25);
     }
 
     async function generateQR() {
