@@ -137,6 +137,37 @@
       opacity: .8;
       pointer-events: none;
     }
+    .envelope-front-mark {
+      position: absolute;
+      right: 0; bottom: 20px; left: 0; z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: rgba(241,223,173,.82);
+      text-align: center;
+      pointer-events: none;
+    }
+    .envelope-front-mark .mark-monogram {
+      display: inline-flex;
+      width: 36px; height: 36px;
+      align-items: center; justify-content: center;
+      margin-bottom: 7px;
+      border: 1px solid rgba(215,182,108,.58);
+      border-radius: 50%;
+      font: 500 .82rem/1 var(--serif);
+      letter-spacing: .02em;
+    }
+    .envelope-front-mark strong {
+      font: 500 1.05rem/1 var(--serif);
+      letter-spacing: .06em;
+    }
+    .envelope-front-mark small {
+      margin-top: 5px;
+      color: rgba(241,223,173,.55);
+      font: 500 .46rem/1 var(--sans);
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+    }
     .letter {
       position: absolute;
       bottom: 12px; left: 22px; z-index: 2;
@@ -853,6 +884,9 @@
       .envelope-wrap { width: min(340px, 88vw); }
       .envelope-wrap { height: min(230px, 62vw); min-height: 205px; }
       .letter { left: 6%; width: 88%; height: 82%; padding: 18px; }
+      .envelope-front-mark { bottom: 15px; }
+      .envelope-front-mark strong { font-size: .92rem; }
+      .envelope-front-mark small { font-size: .4rem; letter-spacing: 1.8px; }
 
       /* Personalise */
       .personalise-row    { flex-direction: column; }
@@ -913,6 +947,11 @@
         </div>
         <div class="wax-seal">T&amp;A</div>
         <div class="envelope-pocket"></div>
+        <div class="envelope-front-mark" aria-hidden="true">
+          <span class="mark-monogram">T&amp;A</span>
+          <strong>Ahmad &amp; Toyibat</strong>
+          <small>Wedding Invitation · 21 November 2026</small>
+        </div>
       </div>
     </div>
     <p class="open-prompt" id="open-prompt">Click the invitation to open</p>
