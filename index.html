@@ -218,11 +218,12 @@ svg.star { display: inline-block; }
 .cd-lbl  { font-size: clamp(6px,.9vw,8px); font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--mu); margin-top: 4px; }
 
 /* toast */
-.toast { font-size: clamp(14px,2.6vw,30px); font-style: italic; line-height: 1.7; color: #fff; text-align: center; }
+.toast { font-size: clamp(13px,2.3vw,26px); font-style: italic; line-height: 1.75; color: #fff; text-align: center; }
 .toast p { margin: 0; }
-.toast-extra { font-size: clamp(10px,1.7vw,16px); font-style: italic; line-height: 1.65; color: rgba(253,248,240,.85); text-align: center; max-width: 88%; margin: 0 auto; }
-.toast-finale { font-size: clamp(12px,2vw,20px); font-weight: 500; color: var(--gold); text-align: center; margin-top: 6px; letter-spacing: .01em; }
-.toast-cite { font-size: clamp(8px,1.1vw,10px); font-style: normal; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); text-align: center; }
+.toast-s2 { opacity: .82; }
+.toast-divider { font-size: clamp(14px,1.8vw,18px); color: var(--gold); opacity: .65; margin: clamp(8px,1.4vw,14px) 0; letter-spacing: .4em; }
+.toast-finale { font-size: clamp(14px,2.4vw,28px); font-style: italic; font-weight: 500; color: var(--gold); text-align: center; letter-spacing: -.01em; margin-bottom: 4px; }
+.toast-cite { font-size: clamp(8px,1vw,10px); font-style: normal; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: rgba(201,168,76,.7); text-align: center; }
 
 /* verse */
 .verse     { font-size: clamp(11px,1.7vw,17px); font-style: italic; line-height: 1.75; color: var(--ink); text-align: center; max-width: 90%; margin: 0 auto; }
@@ -500,14 +501,14 @@ const pages = [
   /* 8 — toast left */
   pageEmWithCenter(`
     ${stars('#c9a84c',10)}
-    <p class="kicker" style="color:var(--gold);margin-top:16px">A toast</p>
+    <p class="kicker" style="color:var(--gold);margin-top:14px">A toast</p>
     ${rule('rgba(201,168,76,.4)',14)}
     <blockquote class="toast serif"><p>Love brought us together.</p><p>Faith keeps us together.</p><p>But God made it possible.</p><p>It is marvellous in our eyes.</p></blockquote>
-    ${rule('rgba(201,168,76,.4)',12)}
-    <p class="toast-extra serif">By fate, we met. By choice, we stay. Today, we begin our journey as one soul, two hearts beating as one. We promise to grow together, pray and love each other forever.</p>
-    <p class="toast-finale serif">To our beautiful beginning. 🎉🎉</p>
-    ${rule('rgba(201,168,76,.4)',12)}
-    <cite class="toast-cite">T&amp;A Union 2026 · Ahmad &amp; Toyibat</cite>
+    <div class="toast-divider">✦</div>
+    <blockquote class="toast toast-s2 serif"><p>By fate, we met. By choice, we stay.</p><p>Today, we begin our journey as one soul,</p><p>two hearts beating as one.</p><p>We promise to grow together,</p><p>pray and love each other forever.</p></blockquote>
+    ${rule('rgba(201,168,76,.4)',14)}
+    <p class="toast-finale serif">To our beautiful beginning 🎉🎉</p>
+    <cite class="toast-cite">T&amp;A Union · 2026</cite>
   `),
 
   /* 9 — verse right */
