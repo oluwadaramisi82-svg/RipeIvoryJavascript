@@ -67,7 +67,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const DASHBOARD_COOKIE = "ta_dashboard_session";
-const DASHBOARD_SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+// Keep the private dashboard session available through the wedding day.
+const DASHBOARD_SESSION_EXPIRES_AT = new Date("2026-11-21T23:59:59+01:00").getTime();
 
 function dashboardSignature(value) {
   return crypto.createHmac("sha256", process.env.SESSION_SECRET).update(value).digest("hex");
@@ -86,7 +87,7 @@ function hasDashboardSession(req) {
   }, {});
   const [issuedAt, signature] = String(cookies[DASHBOARD_COOKIE] || "").split(".");
   if (!issuedAt || !signature || !/^\d+$/.test(issuedAt)) return false;
-  if (Date.now() - Number(issuedAt) > DASHBOARD_SESSION_MAX_AGE) return false;
+  if (Date.now() >= DASHBOARD_SESSION_EXPIRES_AT) return false;
   const expected = dashboardSignature(issuedAt);
   return signature.length === expected.length && crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 }
@@ -193,7 +194,8 @@ app.post("/guests/login", (req, res) => {
     return res.status(401).send(dashboardLoginPage(key, "That password is not correct."));
   }
   const secure = req.headers["x-forwarded-proto"] === "https" || req.secure;
-  res.setHeader("Set-Cookie", `${DASHBOARD_COOKIE}=${encodeURIComponent(dashboardSessionValue())}; HttpOnly; SameSite=Lax; Max-Age=${DASHBOARD_SESSION_MAX_AGE / 1000}${secure ? "; Secure" : ""}`);
+  const maxAge = Math.max(0, Math.floor((DASHBOARD_SESSION_EXPIRES_AT - Date.now()) / 1000));
+  res.setHeader("Set-Cookie", `${DASHBOARD_COOKIE}=${encodeURIComponent(dashboardSessionValue())}; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure ? "; Secure" : ""}`);
   res.redirect(`/guests?key=${encodeURIComponent(key)}`);
 });
 
