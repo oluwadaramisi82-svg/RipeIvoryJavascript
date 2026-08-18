@@ -433,6 +433,8 @@
       object-fit: cover;
       object-position: center;
       background: #e8dfd2;
+      display: block;
+      backface-visibility: hidden;
       opacity: 0;
       animation: photoFade 15s infinite;
     }
@@ -442,6 +444,8 @@
     /* The first source has letterbox bars; keep the couple centred while
        allowing the frame to crop only those bars. */
     .photo-slide:first-child { object-position: center 52%; }
+    .photo-slide:nth-child(2) { object-position: center 48%; }
+    .photo-slide:nth-child(3) { object-position: center 50%; }
     @keyframes photoFade {
       0%      { opacity: 0; }
       6.67%   { opacity: 1; }
@@ -1039,6 +1043,8 @@
     const params   = new URLSearchParams(window.location.search);
     const guestParam = (params.get("to") || "").trim();
     const isGuestView = guestParam.length > 0;
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
 
     // Inject guest name into the invitation copy
     if (isGuestView) {
@@ -1066,10 +1072,12 @@
     function openInvitation() {
       if (opened) return;
       opened = true;
+      window.scrollTo(0, 0);
       envelope.classList.add("open");
       window.setTimeout(() => {
         envelopeScreen.classList.add("hidden");
         mainWebsite.classList.add("visible");
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       }, 900);
     }
 
