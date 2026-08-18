@@ -482,7 +482,10 @@
        allowing the frame to crop only those bars. */
     .photo-slide:first-child { object-position: center 52%; }
     .photo-slide:nth-child(2) { object-position: center 48%; }
-    .photo-slide:nth-child(3) { object-position: center 50%; }
+    .photo-slide:nth-child(3) {
+      /* Keep both faces and the pink backdrop balanced in the tighter frame. */
+      object-position: center 42%;
+    }
     @keyframes photoFade {
       0%      { opacity: 0; }
       6.67%   { opacity: 1; }
