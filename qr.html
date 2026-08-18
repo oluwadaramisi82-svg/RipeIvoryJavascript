@@ -31,23 +31,14 @@
 
     body {
       min-height: 100vh;
-      background: linear-gradient(172deg, #0d4b3a 0%, #07372b 60%, #07372b 100%);
+      background: var(--cream);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       padding: 56px 24px 72px;
       font-family: var(--sans);
-      color: var(--ivory);
-      /* Subtle diagonal lattice matching the invitation hero */
-      background-image:
-        linear-gradient(172deg, #0d4b3a 0%, #07372b 60%, #07372b 100%),
-        repeating-linear-gradient(
-          -45deg,
-          transparent 0px, transparent 32px,
-          rgba(215,182,108,.04) 32px, rgba(215,182,108,.04) 33px
-        );
-      background-blend-mode: normal;
+      color: var(--ink);
     }
 
     /* ── Header ────────────────────────────────────────────── */
@@ -77,14 +68,14 @@
 
     .header h1 {
       font: 500 2.8rem/1.1 var(--serif);
-      color: var(--ivory);
+      color: var(--emerald);
       letter-spacing: .02em;
       margin-bottom: 10px;
     }
 
     .header p {
       font: 400 .68rem/1.6 var(--sans);
-      color: rgba(241,223,173,.55);
+      color: var(--muted);
       letter-spacing: 2.5px;
       text-transform: uppercase;
     }
@@ -260,11 +251,11 @@
     .footer {
       margin-top: 42px; text-align: center;
       font: 400 .65rem/1.6 var(--sans);
-      color: rgba(241,223,173,.4);
+      color: var(--muted);
       letter-spacing: 1.5px; text-transform: uppercase;
     }
-    .footer a { color: var(--gold); text-decoration: none; }
-    .footer a:hover { color: var(--gold-light); }
+    .footer a { color: var(--emerald); text-decoration: none; }
+    .footer a:hover { color: var(--emerald-soft); }
 
     /* ── Print styles ─────────────────────────────────────── */
     @media print {
