@@ -100,7 +100,7 @@
     .envelope {
       position: absolute; inset: 0;
       border: 1px solid rgba(196,162,78,.55);
-      border-radius: 4px;
+       border-radius: 5px;
       background: linear-gradient(168deg, #1c6651 0%, #0d4b3a 100%);
       overflow: visible;
     }
@@ -115,6 +115,7 @@
        width: 100%; height: 54%;
        background: linear-gradient(160deg, #28745d 0%, #145541 68%, #0d4b3a 100%);
        clip-path: polygon(0 0, 100% 0, 50% 100%);
+       filter: drop-shadow(0 2px 2px rgba(0,0,0,.16));
       transform-origin: top;
       transition: transform .8s cubic-bezier(.4,0,.2,1), z-index .1s linear .55s;
       will-change: transform;
@@ -124,6 +125,17 @@
        width: 100%; height: 56%;
        background: linear-gradient(165deg, #0d4b3a 0%, #07372b 100%);
        clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
+       filter: drop-shadow(0 -1px 1px rgba(0,0,0,.12));
+    }
+    /* Subtle fold seams make the front read as a real folded envelope. */
+    .envelope-pocket::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(34deg, transparent 49.6%, rgba(215,182,108,.22) 50%, transparent 50.4%),
+        linear-gradient(-34deg, transparent 49.6%, rgba(215,182,108,.16) 50%, transparent 50.4%);
+      opacity: .8;
+      pointer-events: none;
     }
     .letter {
       position: absolute;
@@ -417,7 +429,7 @@
       inset: 14px;
       width: calc(100% - 28px);
       height: calc(100% - 28px);
-      object-fit: contain;
+      object-fit: cover;
       object-position: center;
       background: #e8dfd2;
       opacity: 0;
@@ -426,6 +438,9 @@
     .photo-slide:nth-child(1) { animation-delay: 0s; }
     .photo-slide:nth-child(2) { animation-delay: 5s; }
     .photo-slide:nth-child(3) { animation-delay: 10s; }
+    /* The first source has letterbox bars; keep the couple centred while
+       allowing the frame to crop only those bars. */
+    .photo-slide:first-child { object-position: center 52%; }
     @keyframes photoFade {
       0%      { opacity: 0; }
       6.67%   { opacity: 1; }
