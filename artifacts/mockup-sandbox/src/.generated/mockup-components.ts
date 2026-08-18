@@ -5,7 +5,6 @@ export const modules: ModuleMap = {
   "./components/mockups/wedding-invitation/variants/ArchitecturalGeometric.tsx": () => import("../components/mockups/wedding-invitation/variants/ArchitecturalGeometric.tsx"),
   "./components/mockups/wedding-invitation/variants/CulturalCelebration.tsx": () => import("../components/mockups/wedding-invitation/variants/CulturalCelebration.tsx"),
   "./components/mockups/wedding-invitation/variants/EditorialCeremony.tsx": () => import("../components/mockups/wedding-invitation/variants/EditorialCeremony.tsx"),
-  "./components/mockups/wedding-invitation/variants/EditorialColumn.tsx": () => import("../components/mockups/wedding-invitation/variants/EditorialColumn.tsx"),
   "./components/mockups/wedding-invitation/variants/ModernNikah.tsx": () => import("../components/mockups/wedding-invitation/variants/ModernNikah.tsx"),
   "./components/mockups/wedding-invitation/variants/RoyalEmerald.tsx": () => import("../components/mockups/wedding-invitation/variants/RoyalEmerald.tsx")
 };
