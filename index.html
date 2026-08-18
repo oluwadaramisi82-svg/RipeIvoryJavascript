@@ -637,6 +637,26 @@
       margin: 36px 0;
       flex-shrink: 0;
     }
+    .calendar-link {
+      display: flex;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin: 0 auto;
+      padding: 13px 22px;
+      border: 1px solid rgba(215,182,108,.55);
+      color: var(--gold-light);
+      font: 600 .62rem/1 var(--sans);
+      letter-spacing: 1.7px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: background .2s, color .2s;
+    }
+    .calendar-link:hover {
+      background: var(--gold);
+      color: var(--emerald-dark);
+    }
 
     /* ─── Quote section ─────────────────────────────────────────── */
     .quote-section {
@@ -823,6 +843,7 @@
       .event-band-sep   { width: auto; height: 1px; margin: 0 28px; }
       .event-band-item  { padding: 24px 18px; }
       .event-band-item span { display: block; font-size: 1.2rem; }
+      .calendar-link { width: calc(100% - 36px); margin-bottom: 24px; }
 
       /* Nav — collapse text labels, keep logo + key links */
       .nav-links li:nth-child(2) { display: none; } /* hide "Details" */
@@ -989,6 +1010,18 @@
           <span>Rolak Hotel &amp; Suites, Ijebu Ode</span>
         </div>
       </div>
+      <a
+        class="calendar-link"
+        href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Ahmad%20%26%20Toyibat%27s%20Wedding&amp;dates=20261121T100000Z%2F20261121T140000Z&amp;details=The%20solemnization%20of%20Ahmad%20Opeyemi%20and%20Toyibat%20Adeola.%20Reception%20follows%20immediately.&amp;location=Rolak%20Hotel%20%26%20Suites%2C%20Adetola%20Hall%2C%20Ijebu%20Ode%2C%20Ogun%20State"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M7 2v4M17 2v4M3 9h18M7 13h3M7 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        Add to Google Calendar
+      </a>
     </section>
 
     <section class="content-shell" id="details">
