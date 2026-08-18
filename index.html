@@ -1004,6 +1004,16 @@
     // Inject guest name into the invitation copy
     if (isGuestView) {
       document.getElementById("guest-name").textContent = guestParam;
+
+      // Record that this guest opened their invitation (name + time only)
+      try {
+        const payload = JSON.stringify({ name: guestParam });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon("/api/visit", new Blob([payload], { type: "application/json" }));
+        } else {
+          fetch("/api/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true });
+        }
+      } catch (e) { /* tracking must never break the invitation */ }
     }
 
     /* ── Envelope / reveal ─────────────────────────────────────── */

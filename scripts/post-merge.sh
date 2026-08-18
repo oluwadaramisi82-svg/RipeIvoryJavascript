@@ -8,4 +8,9 @@ if [ -f "artifacts/mockup-sandbox/package.json" ]; then
   cd ../..
 fi
 
+# Apply idempotent schema to the development database
+if [ -n "$DATABASE_URL" ] && [ -f "schema.sql" ]; then
+  psql "$DATABASE_URL" -f schema.sql || echo "Warning: schema apply failed"
+fi
+
 echo "Post-merge setup complete."
