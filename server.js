@@ -200,6 +200,10 @@ app.post("/guests/login", (req, res) => {
 });
 
 // Private guest-opens page
+app.get("/dashboard", (req, res) => {
+  res.redirect(`/guests?key=${encodeURIComponent(res.app.locals.guestKey)}`);
+});
+
 app.get("/guests", async (req, res) => {
   const GUEST_LIST_KEY = res.app.locals.guestKey;
   if (!checkKey(req, res, GUEST_LIST_KEY)) return;
