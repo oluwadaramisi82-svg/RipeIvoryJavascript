@@ -363,6 +363,9 @@
     }
 
     async function renderQRToCanvas(canvas, url) {
+      if (!window.QRCode || typeof QRCode.toCanvas !== 'function') {
+        throw new Error('QR generator is unavailable');
+      }
       await QRCode.toCanvas(canvas, url, {
         width: 240,
         margin: 2,
@@ -374,12 +377,24 @@
     async function generateQR() {
       const name = document.getElementById('guest-input').value.trim();
       if (!name) { document.getElementById('guest-input').focus(); return; }
-      const url = buildUrl(name);
-      const canvas = document.getElementById('qr-canvas');
-      await renderQRToCanvas(canvas, url);
-      document.getElementById('qr-guest-label').textContent = name;
-      document.getElementById('qr-url-label').textContent = url;
-      document.getElementById('qr-output').classList.add('visible');
+      const error = document.getElementById('qr-error');
+      error.classList.remove('visible');
+      try {
+        const url = buildUrl(name);
+        const canvas = document.getElementById('qr-canvas');
+        await renderQRToCanvas(canvas, url);
+        document.getElementById('qr-guest-label').textContent = name;
+        document.getElementById('qr-url-label').textContent = url;
+        document.getElementById('qr-output').classList.add('visible');
+        fetch('/api/qr-created', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name })
+        }).catch(() => {});
+      } catch (err) {
+        error.textContent = 'The QR generator could not load. Please refresh and try again.';
+        error.classList.add('visible');
+      }
     }
 
     function downloadQR() {

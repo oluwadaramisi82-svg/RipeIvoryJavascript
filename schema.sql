@@ -7,3 +7,9 @@ CREATE TABLE IF NOT EXISTS invitation_visits (
   guest_name TEXT NOT NULL,
   visited_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS guest_qr_codes (
+  id SERIAL PRIMARY KEY,
+  guest_name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

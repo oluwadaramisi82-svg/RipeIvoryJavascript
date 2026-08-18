@@ -16,6 +16,13 @@ async function initSchema() {
       visited_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS guest_qr_codes (
+      id          SERIAL PRIMARY KEY,
+      guest_name  TEXT        NOT NULL,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
 }
 
 // ── Guest-list access key ─────────────────────────────────────────────────────
@@ -79,6 +86,26 @@ async function fetchVisits() {
   return rows;
 }
 
+async function fetchGuestRows() {
+  const { rows } = await pool.query(`
+    WITH visits AS (
+      SELECT guest_name, COUNT(*)::int AS visits,
+             MIN(visited_at) AS first_visit, MAX(visited_at) AS last_visit
+      FROM invitation_visits GROUP BY guest_name
+    ), qr_codes AS (
+      SELECT guest_name, COUNT(*)::int AS qr_count,
+             MIN(created_at) AS first_qr, MAX(created_at) AS last_qr
+      FROM guest_qr_codes GROUP BY guest_name
+    )
+    SELECT COALESCE(v.guest_name, q.guest_name) AS guest_name,
+           COALESCE(q.qr_count, 0)::int AS qr_count, q.first_qr, q.last_qr,
+           COALESCE(v.visits, 0)::int AS visits, v.first_visit, v.last_visit
+    FROM visits v FULL OUTER JOIN qr_codes q ON q.guest_name = v.guest_name
+    ORDER BY COALESCE(q.last_qr, v.last_visit) DESC
+  `);
+  return rows;
+}
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 // Record a visit — called from the invitation page beacon
@@ -94,20 +121,33 @@ app.post("/api/visit", async (req, res) => {
   }
 });
 
+// Record that a personalised QR code was generated for a guest.
+app.post("/api/qr-created", async (req, res) => {
+  try {
+    const name = String((req.body && req.body.name) || "").trim().slice(0, 120);
+    if (!name) return res.status(400).json({ ok: false, error: "name required" });
+    await pool.query("INSERT INTO guest_qr_codes (guest_name) VALUES ($1)", [name]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("QR record failed:", err.message);
+    res.status(500).json({ ok: false });
+  }
+});
+
 // Private guest-opens page
 app.get("/guests", async (req, res) => {
   const GUEST_LIST_KEY = res.app.locals.guestKey;
   if (!checkKey(req, res, GUEST_LIST_KEY)) return;
   try {
-    const rows = await fetchVisits();
+    const rows = await fetchGuestRows();
     const body = rows.length
       ? rows
           .map(
             (r) =>
-              `<tr><td>${esc(r.guest_name)}</td><td>${r.visits}</td><td>${fmt(r.first_visit)}</td><td>${fmt(r.last_visit)}</td></tr>`
+              `<tr><td>${esc(r.guest_name)}</td><td>${r.qr_count ? `Yes · ${r.qr_count}` : "No"}</td><td>${r.last_qr ? fmt(r.last_qr) : "—"}</td><td>${r.visits ? `Yes · ${r.visits}` : "No"}</td><td>${r.last_visit ? fmt(r.last_visit) : "—"}</td></tr>`
           )
           .join("\n")
-      : `<tr><td colspan="4" class="empty">No one has opened their invitation yet.</td></tr>`;
+      : `<tr><td colspan="5" class="empty">No QR codes or invitation opens recorded yet.</td></tr>`;
     res.send(`<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
@@ -123,9 +163,9 @@ app.get("/guests", async (req, res) => {
   .empty{text-align:center;color:#9a8a78;padding:2rem}
   a.csv{display:inline-block;margin-top:1rem;color:#7a5c3e}
 </style></head><body><div class="wrap">
-<h1>Who has opened the invitation</h1>
-<p class="sub">${rows.length} guest${rows.length === 1 ? "" : "s"} so far · times shown in Lagos time</p>
-<table><thead><tr><th>Guest</th><th>Opens</th><th>First opened</th><th>Last opened</th></tr></thead>
+<h1>Guest invitation activity</h1>
+<p class="sub">${rows.length} guest${rows.length === 1 ? "" : "s"} with QR or open activity · times shown in Lagos time</p>
+<table><thead><tr><th>Guest</th><th>QR created</th><th>Last QR created</th><th>Invitation opened</th><th>Last opened</th></tr></thead>
 <tbody>${body}</tbody></table>
 <a class="csv" href="/guests.csv?key=${encodeURIComponent(GUEST_LIST_KEY)}">Download as spreadsheet (CSV)</a>
 </div></body></html>`);
@@ -141,9 +181,10 @@ app.get("/guests.csv", async (req, res) => {
   if (!checkKey(req, res, GUEST_LIST_KEY)) return;
   try {
     const rows = await fetchVisits();
-    const lines = ["Guest,Opens,First opened,Last opened"].concat(
+    const rows = await fetchGuestRows();
+    const lines = ["Guest,QR created,Last QR created,Invitation opened,Last opened"].concat(
       rows.map((r) =>
-        [csvCell(r.guest_name), r.visits, csvCell(fmt(r.first_visit)), csvCell(fmt(r.last_visit))].join(",")
+        [csvCell(r.guest_name), r.qr_count, csvCell(r.last_qr ? fmt(r.last_qr) : ""), r.visits, csvCell(r.last_visit ? fmt(r.last_visit) : "")].join(",")
       )
     );
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
