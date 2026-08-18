@@ -1099,20 +1099,31 @@
       btn.addEventListener("click", () => {
         const link = buildLink();
         if (!link) { feedback.textContent = "Enter a name first."; return; }
+        const showCopied = (message = "✓ Link copied!") => {
+          feedback.textContent = message;
+          window.setTimeout(() => { feedback.textContent = ""; }, 4000);
+        };
+        const fallbackCopy = () => {
+          const tmp = document.createElement("input");
+          tmp.value = link;
+          tmp.setAttribute("readonly", "");
+          tmp.style.position = "fixed";
+          tmp.style.opacity = "0";
+          document.body.appendChild(tmp);
+          tmp.select();
+          let copied = false;
+          try { copied = document.execCommand("copy"); } catch (e) {}
+          document.body.removeChild(tmp);
+          showCopied(copied ? "✓ Link copied!" : "Select and copy the link: " + link);
+        };
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+          fallbackCopy();
+          return;
+        }
         navigator.clipboard.writeText(link).then(() => {
           feedback.textContent = "✓ Link copied! Paste it into WhatsApp or email.";
           window.setTimeout(() => { feedback.textContent = ""; }, 4000);
-        }).catch(() => {
-          // Fallback: select a temporary input
-          const tmp = document.createElement("input");
-          tmp.value = link;
-          document.body.appendChild(tmp);
-          tmp.select();
-          document.execCommand("copy");
-          document.body.removeChild(tmp);
-          feedback.textContent = "✓ Link copied!";
-          window.setTimeout(() => { feedback.textContent = ""; }, 4000);
-        });
+        }).catch(fallbackCopy);
       });
 
       input.addEventListener("keydown", (e) => {
