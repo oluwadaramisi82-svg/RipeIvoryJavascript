@@ -1,1 +1,2 @@
 - [Static workflow tracking](static-workflow-tracking.md) — run static-web-server as the directly tracked foreground workflow process so crashes remain diagnosable.
+- [Node workflow bootstrap](node-workflow-bootstrap.md) — restart the Node server only after project dependencies have been installed in the workspace.
