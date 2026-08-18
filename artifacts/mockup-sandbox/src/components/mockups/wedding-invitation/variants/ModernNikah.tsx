@@ -349,13 +349,6 @@ export function ModernNikah() {
           <p className="kicker" style={{ color: 'var(--gold)', marginTop: 14 }}>A toast</p>
           <Rule color="rgba(201,168,76,.4)" my={14} />
           <blockquote className="toast mn-serif">
-            <p>Love brought us together.</p>
-            <p>Faith keeps us together.</p>
-            <p>But God made it possible.</p>
-            <p>It is marvellous in our eyes.</p>
-          </blockquote>
-          <div className="toast-divider">✦</div>
-          <blockquote className="toast toast-s2 mn-serif">
             <p>By fate, we met. By choice, we stay.</p>
             <p>Today, we begin our journey as one soul,</p>
             <p>two hearts beating as one.</p>
