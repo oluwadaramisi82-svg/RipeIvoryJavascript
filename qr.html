@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
     :root {
       --emerald: #0d4b3a;
@@ -153,6 +153,15 @@
       gap: 22px;
     }
     .qr-output.visible { display: flex; }
+    .qr-error {
+      display: none;
+      margin-top: 12px;
+      color: #a34d3f;
+      font-size: .72rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .qr-error.visible { display: block; }
 
     .qr-frame {
       position: relative;
@@ -325,6 +334,7 @@
         </button>
       </div>
     </div>
+    <p class="qr-error" id="qr-error" role="alert"></p>
 
     <!-- Batch section -->
     <div class="batch-section">
