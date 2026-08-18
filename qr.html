@@ -191,6 +191,19 @@
       color: var(--muted);
       word-break: break-all;
     }
+    .qr-caption a.qr-url {
+      display: inline-block;
+      color: var(--emerald);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .qr-caption a.qr-url:hover {
+      color: var(--gold);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
     .qr-caption .qr-brand {
       margin-bottom: 5px;
       color: var(--gold);
@@ -322,7 +335,7 @@
       <div class="qr-caption">
         <div class="guest-name" id="qr-guest-label"></div>
           <div class="qr-brand">T&amp;A 2026 · Personalised Invitation</div>
-        <div class="qr-url" id="qr-url-label"></div>
+          <a class="qr-url" id="qr-url-label" href="/" target="_blank" rel="noopener">T&amp;A 2026</a>
       </div>
       <div class="actions">
         <button class="btn-action btn-download" onclick="downloadQR()">
@@ -415,7 +428,9 @@
         const canvas = document.getElementById('qr-canvas');
         await renderQRToCanvas(canvas, url);
         document.getElementById('qr-guest-label').textContent = name;
-        document.getElementById('qr-url-label').textContent = url;
+        const urlLabel = document.getElementById('qr-url-label');
+        urlLabel.textContent = 'T&A 2026';
+        urlLabel.href = url;
         document.getElementById('qr-output').classList.add('visible');
         fetch('/api/qr-created', {
           method: 'POST',
