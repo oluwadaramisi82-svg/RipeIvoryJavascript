@@ -64,6 +64,55 @@ const fmt = (d) =>
 // ── App setup ─────────────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+const DASHBOARD_COOKIE = "ta_dashboard_session";
+const DASHBOARD_SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+function dashboardSignature(value) {
+  return crypto.createHmac("sha256", process.env.SESSION_SECRET).update(value).digest("hex");
+}
+
+function dashboardSessionValue() {
+  const issuedAt = Date.now().toString();
+  return `${issuedAt}.${dashboardSignature(issuedAt)}`;
+}
+
+function hasDashboardSession(req) {
+  const cookies = String(req.headers.cookie || "").split(";").reduce((all, part) => {
+    const [key, ...value] = part.trim().split("=");
+    if (key) all[key] = decodeURIComponent(value.join("=") || "");
+    return all;
+  }, {});
+  const [issuedAt, signature] = String(cookies[DASHBOARD_COOKIE] || "").split(".");
+  if (!issuedAt || !signature || !/^\d+$/.test(issuedAt)) return false;
+  if (Date.now() - Number(issuedAt) > DASHBOARD_SESSION_MAX_AGE) return false;
+  const expected = dashboardSignature(issuedAt);
+  return signature.length === expected.length && crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
+
+function dashboardLoginPage(key, message = "") {
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Private Guest Dashboard</title>
+<style>
+body{font-family:Georgia,'Times New Roman',serif;background:#fdf9f3;color:#3d2f23;margin:0;padding:4rem 1rem}
+.box{max-width:380px;margin:0 auto;background:#fff;border:1px solid #e8ddcd;padding:2rem;box-shadow:0 12px 35px rgba(61,47,35,.12)}
+h1{font-size:1.6rem;color:#7a5c3e;margin:0 0 .4rem}p{color:#8a7a68;line-height:1.5}
+label{display:block;color:#7a5c3e;font-size:.78rem;margin:1.3rem 0 .4rem}
+input{width:100%;box-sizing:border-box;padding:.75rem;border:1px solid #d9cbb9;font:inherit}
+button{margin-top:1rem;width:100%;padding:.75rem;border:0;background:#0d4b3a;color:#f1dfad;font-weight:bold;cursor:pointer}
+.error{color:#a34d3f;font-size:.85rem}
+</style></head><body><main class="box">
+<h1>Private guest dashboard</h1><p>Enter the dashboard password to view QR and invitation activity.</p>
+${message ? `<p class="error">${esc(message)}</p>` : ""}
+<form method="post" action="/guests/login">
+<input type="hidden" name="key" value="${esc(key)}">
+<label for="password">Password</label>
+<input id="password" name="password" type="password" autocomplete="current-password" required>
+<button type="submit">Unlock dashboard</button>
+</form></main></body></html>`;
+}
 
 function checkKey(req, res, key) {
   if (req.query.key !== key) {
@@ -134,10 +183,25 @@ app.post("/api/qr-created", async (req, res) => {
   }
 });
 
+app.post("/guests/login", (req, res) => {
+  const key = String(req.body.key || "");
+  if (key !== res.app.locals.guestKey) return res.status(403).send("Not authorized.");
+  const password = String(req.body.password || "");
+  const expected = process.env.GUEST_DASHBOARD_PASSWORD;
+  if (!expected || password.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(password), Buffer.from(expected))) {
+    return res.status(401).send(dashboardLoginPage(key, "That password is not correct."));
+  }
+  const secure = req.headers["x-forwarded-proto"] === "https" || req.secure;
+  res.setHeader("Set-Cookie", `${DASHBOARD_COOKIE}=${encodeURIComponent(dashboardSessionValue())}; HttpOnly; SameSite=Lax; Max-Age=${DASHBOARD_SESSION_MAX_AGE / 1000}${secure ? "; Secure" : ""}`);
+  res.redirect(`/guests?key=${encodeURIComponent(key)}`);
+});
+
 // Private guest-opens page
 app.get("/guests", async (req, res) => {
   const GUEST_LIST_KEY = res.app.locals.guestKey;
   if (!checkKey(req, res, GUEST_LIST_KEY)) return;
+  if (!hasDashboardSession(req)) return res.status(401).send(dashboardLoginPage(req.query.key));
   try {
     const rows = await fetchGuestRows();
     const body = rows.length
@@ -179,6 +243,7 @@ app.get("/guests", async (req, res) => {
 app.get("/guests.csv", async (req, res) => {
   const GUEST_LIST_KEY = res.app.locals.guestKey;
   if (!checkKey(req, res, GUEST_LIST_KEY)) return;
+  if (!hasDashboardSession(req)) return res.status(401).send("Dashboard password required.");
   try {
     const rows = await fetchGuestRows();
     const lines = ["Guest,QR created,Last QR created,Invitation opened,Last opened"].concat(
