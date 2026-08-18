@@ -216,6 +216,7 @@
       letter-spacing: 2.8px; text-transform: uppercase;
     }
     .personalise-row { display: flex; gap: 8px; }
+    .personalise-actions { display: flex; gap: 8px; margin-top: 10px; }
     .personalise-input {
       flex: 1; padding: 10px 14px;
       border: 1px solid rgba(196,162,78,.32); border-radius: 1px;
@@ -231,6 +232,11 @@
       cursor: pointer; white-space: nowrap; transition: background .2s;
     }
     .personalise-btn:hover { background: var(--gold-light); }
+    .personalise-btn.secondary {
+      flex: 1; background: transparent; color: var(--gold-light);
+      border: 1px solid rgba(215,182,108,.45);
+    }
+    .personalise-btn.secondary:hover { background: rgba(215,182,108,.12); }
     .personalise-feedback {
       margin-top: 10px; min-height: 1.2em;
       color: rgba(236,220,170,.58);
@@ -829,6 +835,7 @@
 
       /* Personalise */
       .personalise-row    { flex-direction: column; }
+      .personalise-actions { flex-direction: column; }
       .personalise-input  { padding: 13px 14px; font-size: .9rem; }
       .personalise-btn    { padding: 13px 14px; font-size: .78rem; }
 
@@ -894,7 +901,10 @@
       <span class="personalise-label">Send a personalised invitation</span>
       <div class="personalise-row">
         <input class="personalise-input" id="personalise-input" type="text" placeholder="Guest name…" maxlength="80" />
-        <button class="personalise-btn" id="personalise-btn">Copy link</button>
+      </div>
+      <div class="personalise-actions">
+        <button class="personalise-btn" id="personalise-btn">Create link</button>
+        <button class="personalise-btn secondary" id="qr-btn">Create QR code</button>
       </div>
       <p class="personalise-feedback" id="personalise-feedback"></p>
     </div>
@@ -1099,6 +1109,7 @@
 
       const input    = document.getElementById("personalise-input");
       const btn      = document.getElementById("personalise-btn");
+      const qrBtn    = document.getElementById("qr-btn");
       const feedback = document.getElementById("personalise-feedback");
 
       function buildLink() {
@@ -1138,6 +1149,14 @@
           feedback.textContent = "✓ Link copied! Paste it into WhatsApp or email.";
           window.setTimeout(() => { feedback.textContent = ""; }, 4000);
         }).catch(fallbackCopy);
+      });
+
+      qrBtn.addEventListener("click", () => {
+        const name = input.value.trim();
+        if (!name) { feedback.textContent = "Enter a name first."; input.focus(); return; }
+        const qrPage = new URL("qr.html", window.location.href);
+        qrPage.searchParams.set("name", name);
+        window.open(qrPage.toString(), "_blank", "noopener");
       });
 
       input.addEventListener("keydown", (e) => {
