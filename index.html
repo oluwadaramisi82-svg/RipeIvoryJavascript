@@ -1262,6 +1262,10 @@
       const btn      = document.getElementById("personalise-btn");
       const qrBtn    = document.getElementById("qr-btn");
       const feedback = document.getElementById("personalise-feedback");
+      const linkCard = document.getElementById("personalised-link-card");
+      const linkGuest = document.getElementById("personalised-link-guest");
+      const linkValue = document.getElementById("personalised-link-value");
+      const copyLinkBtn = document.getElementById("personalised-copy-btn");
 
       function buildLink() {
         const name = input.value.trim();
@@ -1275,6 +1279,10 @@
       btn.addEventListener("click", () => {
         const link = buildLink();
         if (!link) { feedback.textContent = "Enter a name first."; return; }
+        const name = input.value.trim();
+        linkGuest.textContent = "For " + name;
+        linkValue.value = link;
+        linkCard.classList.add("visible");
         const showCopied = (message = "✓ Link copied!") => {
           feedback.textContent = message;
           window.setTimeout(() => { feedback.textContent = ""; }, 4000);
@@ -1290,16 +1298,31 @@
           let copied = false;
           try { copied = document.execCommand("copy"); } catch (e) {}
           document.body.removeChild(tmp);
-          showCopied(copied ? "✓ Link copied!" : "Select and copy the link: " + link);
+          showCopied(copied ? "✓ T&A 2026 link copied!" : "Select the link above to copy it.");
         };
         if (!navigator.clipboard || !navigator.clipboard.writeText) {
           fallbackCopy();
           return;
         }
         navigator.clipboard.writeText(link).then(() => {
-          feedback.textContent = "✓ Link copied! Paste it into WhatsApp or email.";
+          feedback.textContent = "✓ T&A 2026 link copied! Paste it into WhatsApp or email.";
           window.setTimeout(() => { feedback.textContent = ""; }, 4000);
         }).catch(fallbackCopy);
+      });
+
+      copyLinkBtn.addEventListener("click", () => {
+        if (!linkValue.value) return;
+        const copied = () => { feedback.textContent = "✓ T&A 2026 link copied!"; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(linkValue.value).then(copied).catch(() => {
+            linkValue.select();
+            feedback.textContent = "Select the link above to copy it.";
+          });
+        } else {
+          linkValue.select();
+          document.execCommand("copy");
+          copied();
+        }
       });
 
       qrBtn.addEventListener("click", () => {
