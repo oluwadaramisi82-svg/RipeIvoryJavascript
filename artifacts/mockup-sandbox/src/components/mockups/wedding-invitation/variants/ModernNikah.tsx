@@ -354,8 +354,13 @@ export function ModernNikah() {
             <p>But God made it possible.</p>
             <p>It is marvellous in our eyes.</p>
           </blockquote>
-          <Rule color="rgba(201,168,76,.4)" my={14} />
-          <cite className="toast-cite">— Ahmad &amp; Toyibat</cite>
+          <Rule color="rgba(201,168,76,.4)" my={12} />
+          <p className="toast-extra mn-serif">
+            By fate, we met. By choice, we stay. Today, we begin our journey as one soul, two hearts beating as one. We promise to grow together, pray and love each other forever.
+          </p>
+          <p className="toast-finale mn-serif">To our beautiful beginning. 🎉🎉</p>
+          <Rule color="rgba(201,168,76,.4)" my={12} />
+          <cite className="toast-cite">T&amp;A Union 2026 · Ahmad &amp; Toyibat</cite>
         </Emerald>
       ),
       right: (
@@ -867,6 +872,8 @@ const CSS = `
   /* toast */
   .toast { font-size:clamp(14px,2.6vw,30px); font-style:italic; line-height:1.7; color:#fff; text-align:center; }
   .toast p { margin:0; }
+  .toast-extra { font-size:clamp(10px,1.7vw,16px); font-style:italic; line-height:1.65; color:rgba(253,248,240,.85); text-align:center; max-width:88%; margin:0 auto; }
+  .toast-finale { font-size:clamp(12px,2vw,20px); font-weight:500; color:var(--gold); text-align:center; margin-top:6px; letter-spacing:.01em; }
   .toast-cite { font-size:clamp(8px,1.1vw,10px); font-style:normal; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); text-align:center; }
 
   /* verse */
