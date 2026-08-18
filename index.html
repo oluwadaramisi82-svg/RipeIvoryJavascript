@@ -146,7 +146,8 @@
       padding: 24px; text-align: center;
       background: var(--ivory);
       border-radius: 2px;
-      transition: transform .95s cubic-bezier(.4,0,.2,1);
+       opacity: 0;
+       transition: transform .95s cubic-bezier(.4,0,.2,1), opacity .25s ease;
       will-change: transform;
       box-shadow:
         inset 0 0 0 1px rgba(196,162,78,.3),
@@ -186,7 +187,7 @@
     }
     .envelope-wrap:hover .wax-seal { transform: translateX(-50%) scale(1.1); }
     .envelope-wrap.open .envelope-flap { z-index: 1; transform: rotateX(180deg); }
-    .envelope-wrap.open .letter { z-index: 5; transform: translateY(-148px); }
+    .envelope-wrap.open .letter { z-index: 5; transform: translateY(-148px); opacity: 1; transition-delay: .25s; }
     .envelope-wrap.open .wax-seal { opacity: 0; transform: translateX(-50%) scale(.65); }
 
     .open-prompt {
@@ -941,6 +942,7 @@
           <p class="family-amp">and</p>
           <p class="family-line">Khalifah Abdul-Hafeez &amp; Alhaja Kudratu-Llah Otunuyi</p>
           <p class="cordially">Cordially invite</p>
+           <p class="guest" id="guest-name" style="display:none"></p>
           <p class="witness">to witness the solemnization of</p>
           <div class="couple-names">
             <span>Ahmad</span>
@@ -1040,6 +1042,10 @@
 
     // Inject guest name into the invitation copy
     if (isGuestView) {
+      const guestName = document.getElementById("guest-name");
+      guestName.textContent = guestParam;
+      guestName.style.display = "block";
+
       // Record that this guest opened their invitation (name + time only)
       try {
         const payload = JSON.stringify({ name: guestParam });
