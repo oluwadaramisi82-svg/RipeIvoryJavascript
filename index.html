@@ -720,18 +720,21 @@
       }
 
       /* Hero */
-      .hero { padding: 72px 20px 60px; }
+      .hero { min-height: auto; padding: 88px 20px 64px; }
+      .hero-inner { padding: 0; }
+      .hero-title { font-size: clamp(2.9rem, 15vw, 5rem); line-height: .9; }
+      .hero-amp { padding: 0 5px; }
       .hero-monogram { width: 52px; height: 52px; font-size: 1.15rem; margin-bottom: 18px; }
       .hero-subtitle  { font-size: 1.15rem; }
       .hero-date      { font-size: .62rem; letter-spacing: 2px; }
 
       /* Countdown */
-      .countdown { margin-top: 36px; }
-      .time-box  { padding: 16px 18px; }
+      .countdown { display: flex; width: 100%; max-width: 360px; margin-top: 36px; }
+      .time-box  { flex: 1; min-width: 0; padding: 16px 8px; }
       .time-label { font-size: .52rem; letter-spacing: 1.8px; }
 
       /* Invitation card — single column */
-      .content-shell  { padding: 48px 16px; }
+      .content-shell  { padding: 40px 14px; }
       .invitation-card {
         grid-template-columns: 1fr;
         gap: 0;
@@ -739,19 +742,32 @@
 
       /* Photo — portrait ratio, centred, standalone */
       .photo-slideshow {
-        width: min(300px, 88%);
+        width: 100%;
         margin: 0 auto;
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 4 / 5;
         height: auto;
         min-height: unset;
         max-height: none;
         border-right: none;
         border-bottom: 1px solid rgba(196,162,78,.22);
-        padding: 12px;
+        padding: 10px;
+      }
+      .photo-slide {
+        inset: 10px;
+        width: calc(100% - 20px);
+        height: calc(100% - 20px);
+        object-fit: contain;
+        object-position: center;
+        background: #e8dfd2;
       }
 
       /* Invitation copy — tighter padding on mobile */
-      .invitation-copy { padding: 28px 20px 36px; }
+      .invitation-copy { padding: 38px 22px 42px; }
+      .invitation-copy::before { inset: 10px; }
+      .bismillah-main { font-size: 1.35rem; margin-bottom: 22px; }
+      .family-line { font-size: 1.16rem; line-height: 1.25; }
+      .witness { font-size: 1.05rem; }
+      .couple-names { font-size: clamp(2.35rem, 14vw, 3.4rem); }
 
       /* Info & contact grids */
       .info-grid         { grid-template-columns: 1fr; }
@@ -778,7 +794,8 @@
       /* Event band — stack vertically */
       .event-band-inner { flex-direction: column; }
       .event-band-sep   { width: auto; height: 1px; margin: 0 28px; }
-      .event-band-item  { padding: 28px 24px; }
+      .event-band-item  { padding: 24px 18px; }
+      .event-band-item span { display: block; font-size: 1.2rem; }
 
       /* Nav — collapse text labels, keep logo + key links */
       .nav-links li:nth-child(2) { display: none; } /* hide "Details" */
@@ -809,8 +826,10 @@
       .nav-links a { padding: 0 4px; font-size: .5rem; }
       .hero { padding: 60px 16px 48px; }
       .time-box { padding: 12px 12px; }
-      .invitation-card { padding: 18px 14px 28px; }
+      .invitation-card { padding: 0; }
       .content-shell { padding: 40px 12px; }
+      .photo-slideshow { aspect-ratio: 5 / 6; }
+      .invitation-copy { padding-left: 18px; padding-right: 18px; }
     }
 
     /* Safe-area insets (notched phones) */
