@@ -1,0 +1,1 @@
+- [Static workflow tracking](static-workflow-tracking.md) — run static-web-server as the directly tracked foreground workflow process so crashes remain diagnosable.
