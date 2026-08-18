@@ -483,6 +483,15 @@
        allowing the frame to crop only those bars. */
     .photo-slide:first-child { object-position: center 52%; }
     .photo-slide:nth-child(2) { object-position: center 48%; }
+    .photo-slide:nth-child(2) {
+      /* The wider portrait needs a slightly higher crop to balance the
+         couple's faces and keep the frame edge clean. */
+      object-position: center 44%;
+      outline: none;
+      border: 0;
+      box-shadow: none;
+      clip-path: inset(2px);
+    }
     .photo-slide:nth-child(3) {
       /* Keep both faces and the pink backdrop balanced in the tighter frame. */
       object-position: center 42%;
