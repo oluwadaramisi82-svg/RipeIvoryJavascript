@@ -341,9 +341,11 @@
     .couple-photo {
       display: block;
       width: 100%;
-      height: 520px;
-      object-fit: cover;
-      object-position: center;
+      height: auto;
+      max-height: 620px;
+      object-fit: contain;
+      object-position: center top;
+      background: var(--emerald-dark);
       border: 7px solid var(--paper);
       outline: 1px solid var(--champagne);
       box-shadow: 0 12px 28px rgba(7,55,43,.16);
@@ -602,7 +604,7 @@
 </head>
 <body>
   <section id="envelope-screen" aria-label="Open wedding invitation">
-    <p class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+    <p class="bismillah">In the name of Allah, the Most Gracious, the Most Merciful</p>
     <div class="envelope-wrap" id="envelope" role="button" tabindex="0" aria-label="Open invitation">
       <div class="envelope">
         <div class="envelope-flap"></div>
@@ -650,7 +652,7 @@
       <div class="invitation-card">
         <img class="couple-photo" src="attached_assets/image_1787076009857.png" alt="Ahmad and Toyibat together at their celebration" />
         <div class="invitation-copy">
-          <p class="bismillah-main">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+          <p class="bismillah-main">In the name of Allah, the Most Gracious, the Most Merciful</p>
           <p class="copy-intro">The families of</p>
           <p class="family-line">Prof Taofiki &amp; Alhaja Basirat Salako</p>
           <p class="family-amp">and</p>
@@ -716,8 +718,8 @@
         <div class="contact"><strong>Aweda</strong><a href="tel:08026642105">08026642105</a></div>
       </div>
       <div class="dress-code">
-        <div class="dress-item"><strong>Bride's colour</strong><span>Champagne Gold</span></div>
-        <div class="dress-item"><strong>Groom's colour</strong><span>Emerald Green</span></div>
+        <div class="dress-item"><strong>Bride's colour</strong><span>Emerald Green</span></div>
+        <div class="dress-item"><strong>Groom's colour</strong><span>Champagne Gold</span></div>
       </div>
     </section>
 

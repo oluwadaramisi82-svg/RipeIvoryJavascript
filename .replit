@@ -1,5 +1,5 @@
 entrypoint = "index.html"
-modules = ["web", "python-base-3.13"]
+modules = ["web", "python-base-3.13", "nodejs-20"]
 
 [nix]
 channel = "stable-24_11"
@@ -10,7 +10,7 @@ publicDir = "/"
 deploymentTarget = "static"
 
 [workflows]
-runButton = "Serve static"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Serve static"
@@ -28,3 +28,7 @@ waitForPort = 80
 [[ports]]
 localPort = 80
 externalPort = 80
+
+[[ports]]
+localPort = 23636
+externalPort = 3000
