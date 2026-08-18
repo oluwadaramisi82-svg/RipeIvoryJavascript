@@ -180,7 +180,6 @@ app.get("/guests.csv", async (req, res) => {
   const GUEST_LIST_KEY = res.app.locals.guestKey;
   if (!checkKey(req, res, GUEST_LIST_KEY)) return;
   try {
-    const rows = await fetchVisits();
     const rows = await fetchGuestRows();
     const lines = ["Guest,QR created,Last QR created,Invitation opened,Last opened"].concat(
       rows.map((r) =>
