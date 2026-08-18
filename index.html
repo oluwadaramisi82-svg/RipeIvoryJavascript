@@ -187,6 +187,75 @@
     }
     @keyframes pulse { 0%,100% { opacity: .52; } 50% { opacity: 1; } }
 
+    /* Personalise bar (sender view) */
+    .personalise-bar {
+      position: relative;
+      z-index: 1;
+      margin-top: 40px;
+      padding: 22px 26px;
+      border: 1px solid rgba(215,182,108,.3);
+      background: rgba(7,55,43,.55);
+      backdrop-filter: blur(10px);
+      text-align: center;
+      max-width: 370px;
+    }
+    .personalise-label {
+      display: block;
+      margin-bottom: 12px;
+      color: rgba(241,223,173,.7);
+      font-size: .64rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .personalise-row {
+      display: flex;
+      gap: 8px;
+    }
+    .personalise-input {
+      flex: 1;
+      padding: 9px 13px;
+      border: 1px solid rgba(215,182,108,.4);
+      border-radius: 2px;
+      background: rgba(255,253,248,.07);
+      color: var(--champagne-light);
+      font: .82rem var(--sans);
+      outline: none;
+    }
+    .personalise-input::placeholder { color: rgba(241,223,173,.38); }
+    .personalise-input:focus { border-color: rgba(215,182,108,.75); background: rgba(255,253,248,.11); }
+    .personalise-btn {
+      padding: 9px 15px;
+      border: none;
+      border-radius: 2px;
+      background: var(--champagne);
+      color: var(--emerald-dark);
+      font: 600 .72rem var(--sans);
+      letter-spacing: 1px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .personalise-btn:hover { background: var(--champagne-light); }
+    .personalise-feedback {
+      margin-top: 9px;
+      min-height: 1.2em;
+      color: rgba(241,223,173,.7);
+      font-size: .65rem;
+      letter-spacing: 1px;
+    }
+
+    /* Guest-view banner on envelope */
+    .guest-greeting {
+      position: relative;
+      z-index: 1;
+      margin-top: 32px;
+      color: var(--champagne-light);
+      font: 1.08rem var(--serif);
+      font-style: italic;
+      text-align: center;
+    }
+
     /* Invitation page */
     #main-website { opacity: 0; transition: opacity 1s ease .25s; }
     #main-website.visible { opacity: 1; }
@@ -617,7 +686,20 @@
         <div class="envelope-pocket"></div>
       </div>
     </div>
-    <p class="open-prompt">Click the invitation to open</p>
+    <p class="open-prompt" id="open-prompt">Click the invitation to open</p>
+
+    <!-- Shown to the SENDER when no ?to= param is present -->
+    <div class="personalise-bar" id="personalise-bar" style="display:none">
+      <span class="personalise-label">Send a personalised invitation</span>
+      <div class="personalise-row">
+        <input class="personalise-input" id="personalise-input" type="text" placeholder="Guest name…" maxlength="80" />
+        <button class="personalise-btn" id="personalise-btn">Copy link</button>
+      </div>
+      <p class="personalise-feedback" id="personalise-feedback"></p>
+    </div>
+
+    <!-- Shown to the GUEST when ?to= param is present -->
+    <p class="guest-greeting" id="guest-greeting" style="display:none"></p>
   </section>
 
   <main id="main-website">
@@ -658,7 +740,7 @@
           <p class="family-amp">and</p>
           <p class="family-line">Khalifah Abdul-Hafeez &amp; Alhaja Kudratu-Llah Otunuyi</p>
           <p class="cordially">Cordially invite</p>
-          <p class="guest">V.C. TASUED (Prof. Banjo)</p>
+          <p class="guest" id="guest-name">V.C. TASUED (Prof. Banjo)</p>
           <p class="witness">to witness the solemnization of</p>
           <div class="couple-names">
             <span>Ahmad Opeyemi</span>
@@ -730,9 +812,20 @@
   </main>
 
   <script>
-    const envelope = document.getElementById("envelope");
+    /* ── Personalisation ───────────────────────────────────────── */
+    const params   = new URLSearchParams(window.location.search);
+    const guestParam = (params.get("to") || "").trim();
+    const isGuestView = guestParam.length > 0;
+
+    // Inject guest name into the invitation copy
+    if (isGuestView) {
+      document.getElementById("guest-name").textContent = guestParam;
+    }
+
+    /* ── Envelope / reveal ─────────────────────────────────────── */
+    const envelope       = document.getElementById("envelope");
     const envelopeScreen = document.getElementById("envelope-screen");
-    const mainWebsite = document.getElementById("main-website");
+    const mainWebsite    = document.getElementById("main-website");
     let opened = false;
 
     function openInvitation() {
@@ -744,30 +837,70 @@
         mainWebsite.classList.add("visible");
       }, 900);
     }
+
     envelope.addEventListener("click", openInvitation);
-    envelope.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openInvitation();
-      }
+    envelope.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openInvitation(); }
     });
 
-    const weddingDate = new Date("November 21, 2026 11:00:00").getTime();
-    const countdown = document.querySelector(".countdown");
-    function updateCountdown() {
-      const difference = weddingDate - Date.now();
-      if (difference <= 0) {
-        countdown.innerHTML = "<p>The celebration is today.</p>";
-        return;
+    if (isGuestView) {
+      // Guest view: show greeting, then auto-open after a short pause
+      const greeting = document.getElementById("guest-greeting");
+      greeting.textContent = "For " + guestParam + " — tap to open your invitation";
+      greeting.style.display = "block";
+      document.getElementById("open-prompt").style.display = "none";
+      window.setTimeout(openInvitation, 2200);
+    } else {
+      // Sender view: show the personalise bar
+      document.getElementById("personalise-bar").style.display = "block";
+
+      const input    = document.getElementById("personalise-input");
+      const btn      = document.getElementById("personalise-btn");
+      const feedback = document.getElementById("personalise-feedback");
+
+      function buildLink() {
+        const name = input.value.trim();
+        if (!name) return null;
+        const url = new URL(window.location.href);
+        url.search = "";           // clear any leftover params
+        url.searchParams.set("to", name);
+        return url.toString();
       }
-      const days = Math.floor(difference / 86400000);
-      const hours = Math.floor((difference % 86400000) / 3600000);
-      const minutes = Math.floor((difference % 3600000) / 60000);
-      const seconds = Math.floor((difference % 60000) / 1000);
-      document.getElementById("days").textContent = String(days).padStart(2, "0");
-      document.getElementById("hours").textContent = String(hours).padStart(2, "0");
-      document.getElementById("minutes").textContent = String(minutes).padStart(2, "0");
-      document.getElementById("seconds").textContent = String(seconds).padStart(2, "0");
+
+      btn.addEventListener("click", () => {
+        const link = buildLink();
+        if (!link) { feedback.textContent = "Enter a name first."; return; }
+        navigator.clipboard.writeText(link).then(() => {
+          feedback.textContent = "✓ Link copied! Paste it into WhatsApp or email.";
+          window.setTimeout(() => { feedback.textContent = ""; }, 4000);
+        }).catch(() => {
+          // Fallback: select a temporary input
+          const tmp = document.createElement("input");
+          tmp.value = link;
+          document.body.appendChild(tmp);
+          tmp.select();
+          document.execCommand("copy");
+          document.body.removeChild(tmp);
+          feedback.textContent = "✓ Link copied!";
+          window.setTimeout(() => { feedback.textContent = ""; }, 4000);
+        });
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") btn.click();
+      });
+    }
+
+    /* ── Countdown ─────────────────────────────────────────────── */
+    const weddingDate = new Date("November 21, 2026 11:00:00").getTime();
+    const countdown   = document.querySelector(".countdown");
+    function updateCountdown() {
+      const diff = weddingDate - Date.now();
+      if (diff <= 0) { countdown.innerHTML = "<p>The celebration is today.</p>"; return; }
+      document.getElementById("days").textContent    = String(Math.floor(diff / 86400000)).padStart(2, "0");
+      document.getElementById("hours").textContent   = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, "0");
+      document.getElementById("minutes").textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+      document.getElementById("seconds").textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
     }
     updateCountdown();
     window.setInterval(updateCountdown, 1000);
