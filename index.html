@@ -1040,8 +1040,6 @@
 
     // Inject guest name into the invitation copy
     if (isGuestView) {
-      document.getElementById("guest-name").textContent = guestParam;
-
       // Record that this guest opened their invitation (name + time only)
       try {
         const payload = JSON.stringify({ name: guestParam });
