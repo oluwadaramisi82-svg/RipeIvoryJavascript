@@ -1296,6 +1296,26 @@
         return url.toString();
       }
 
+      async function copyBrandedLink(link) {
+        const label = "T&A 2026";
+        if (navigator.clipboard && window.ClipboardItem && navigator.clipboard.write) {
+          const safeUrl = link.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+          const html = `<a href="${safeUrl}">${label}</a>`;
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "text/html": new Blob([html], { type: "text/html" }),
+              "text/plain": new Blob([label], { type: "text/plain" }),
+            }),
+          ]);
+          return;
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(label);
+          return;
+        }
+        throw new Error("Clipboard unavailable");
+      }
+
       btn.addEventListener("click", () => {
         const link = buildLink();
         if (!link) { feedback.textContent = "Enter a name first."; return; }
@@ -1310,7 +1330,7 @@
         };
         const fallbackCopy = () => {
           const tmp = document.createElement("input");
-          tmp.value = link;
+          tmp.value = "T&A 2026";
           tmp.setAttribute("readonly", "");
           tmp.style.position = "fixed";
           tmp.style.opacity = "0";
@@ -1321,12 +1341,8 @@
           document.body.removeChild(tmp);
           showCopied(copied ? "✓ T&A 2026 link copied!" : "Select the link above to copy it.");
         };
-        if (!navigator.clipboard || !navigator.clipboard.writeText) {
-          fallbackCopy();
-          return;
-        }
-        navigator.clipboard.writeText(link).then(() => {
-          feedback.textContent = "✓ T&A 2026 link copied! Paste it into WhatsApp or email.";
+        copyBrandedLink(link).then(() => {
+          feedback.textContent = "✓ T&A 2026 copied as an elegant hyperlink.";
           window.setTimeout(() => { feedback.textContent = ""; }, 4000);
         }).catch(fallbackCopy);
       });
@@ -1334,13 +1350,9 @@
       copyLinkBtn.addEventListener("click", () => {
         if (!linkValue.href || linkValue.getAttribute("href") === "#") return;
         const copied = () => { feedback.textContent = "✓ T&A 2026 link copied!"; };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(linkValue.href).then(copied).catch(() => {
-            feedback.textContent = "Copy the link using your browser.";
-          });
-        } else {
-          feedback.textContent = "Copy the link using your browser.";
-        }
+        copyBrandedLink(linkValue.href).then(copied).catch(() => {
+          feedback.textContent = "Copy the T&A 2026 text using your browser.";
+        });
       });
 
       qrBtn.addEventListener("click", () => {
