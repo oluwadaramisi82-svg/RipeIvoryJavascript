@@ -316,6 +316,21 @@
       border: 1px solid rgba(215,182,108,.45);
     }
     .personalise-btn.secondary:hover { background: rgba(215,182,108,.12); }
+    .guest-activity-link {
+      display: block;
+      margin-top: 14px;
+      color: rgba(236,220,170,.72);
+      font: 600 .58rem var(--sans);
+      letter-spacing: 1.7px;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .guest-activity-link:hover {
+      color: var(--gold-light);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
     .personalise-feedback {
       margin-top: 10px; min-height: 1.2em;
       color: rgba(236,220,170,.58);
@@ -1124,6 +1139,7 @@
         <button class="personalise-btn" id="personalise-btn">Create link</button>
         <button class="personalise-btn secondary" id="qr-btn">Create QR code</button>
       </div>
+      <a class="guest-activity-link" href="/dashboard" target="_blank" rel="noopener">View guest activity</a>
       <div class="personalised-link-card" id="personalised-link-card" aria-live="polite">
         <span class="personalised-link-brand">T&amp;A 2026</span>
         <span class="personalised-link-guest" id="personalised-link-guest"></span>
