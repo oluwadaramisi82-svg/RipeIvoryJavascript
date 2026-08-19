@@ -66,3 +66,17 @@ mtime_ms = 1787133454570
 storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/aba7bf5f-86a8-4dfe-a6cf-033e0befe324/e340a4b3-3b19-4ce1-989f-89748ef178fc"
 storage_version_token = "1787133462642246"
 content_type = "audio/mpeg"
+
+[[outputs]]
+id = "K8gtIqKheFSaRXfkombF9"
+uri = "file://attached_assets/wedding-smooth-remix.mp3"
+type = "audio"
+title = "T&A 2026 Smooth Music Remix"
+description = "A 3:54 smooth medley using three sections from Mp3_1 blended with Mp3_2 through 03:16. Transitions use five-second crossfades and balanced loudness."
+logical_id = "b0ee5bbb-1e9e-40ad-8018-931343e476bc"
+content_hash = "sha256:deffe4a68cf16148784eecb11d7c28e887d22a78e5959bccc95f8eca9e78853e"
+size = 5620181
+mtime_ms = 1787133736923
+storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/b0ee5bbb-1e9e-40ad-8018-931343e476bc/11de7633-fbc6-4266-9926-44a0957b65e3"
+storage_version_token = "1787133744280721"
+content_type = "audio/mpeg"
