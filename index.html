@@ -1172,7 +1172,7 @@
   </style>
 </head>
 <body>
-  <audio id="wedding-audio" preload="metadata" loop>
+  <audio id="wedding-audio" preload="auto" loop>
     <source src="/audio/wedding-smooth-remix.mp3?v=linear-medley-20260819" type="audio/mpeg" />
   </audio>
   <div class="creator-watermark" aria-label="Made by Aliyat.O">Made by Aliyat.O</div>
@@ -1430,6 +1430,10 @@
     async function playWeddingMusic() {
       try {
         weddingAudio.volume = 0.68;
+        weddingAudio.muted = false;
+        if (weddingAudio.readyState === HTMLMediaElement.HAVE_NOTHING) {
+          weddingAudio.load();
+        }
         await weddingAudio.play();
         setMusicButton(true);
         setGuestAudioPrompt(false);
@@ -1461,6 +1465,9 @@
       }, 900);
     }
 
+    // pointerup preserves the user's direct tap on touch devices, which is
+    // required by mobile browsers before they allow audio playback.
+    envelope.addEventListener("pointerup", openInvitation);
     envelope.addEventListener("click", openInvitation);
     envelope.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openInvitation(); }
@@ -1491,8 +1498,9 @@
       const welcome = document.getElementById("guest-welcome");
       welcome.textContent = "As-salamu alaykum wa rahmatullahi wa barakatuh, " + guestParam + ". We warmly welcome you to celebrate with us.";
       welcome.style.display = "block";
-      document.getElementById("open-prompt").style.display = "none";
-      window.setTimeout(openInvitation, 2200);
+      const guestOpenPrompt = document.getElementById("open-prompt");
+      guestOpenPrompt.textContent = "Tap the envelope to open and play the music";
+      guestOpenPrompt.style.display = "block";
     } else {
       // Sender view: show the personalise bar
       document.getElementById("personalise-bar").style.display = "block";
