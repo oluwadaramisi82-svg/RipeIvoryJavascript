@@ -10,7 +10,7 @@ run = ["node", "server.js"]
 deploymentTarget = "vm"
 
 [workflows]
-runButton = "Project"
+runButton = "Start application"
 
 [[workflows.workflow]]
 name = "Start application"
