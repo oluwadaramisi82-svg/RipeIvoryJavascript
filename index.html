@@ -205,6 +205,22 @@
       color: var(--gold-light);
       font: italic .78rem/1.35 var(--serif);
     }
+    .creator-watermark {
+      position: fixed;
+      left: max(12px, env(safe-area-inset-left));
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 40;
+      color: rgba(236,220,170,.72);
+      font: 500 .58rem/1 var(--sans);
+      letter-spacing: .8px;
+      text-shadow: 0 1px 5px rgba(0,0,0,.28);
+      padding: 6px 9px;
+      border: 1px solid rgba(215,182,108,.32);
+      border-radius: 2px;
+      background: rgba(5,30,19,.66);
+      pointer-events: none;
+      user-select: none;
+    }
     .letter {
       position: absolute;
       bottom: 12px; left: 22px; z-index: 2;
@@ -1127,6 +1143,7 @@
   <audio id="wedding-audio" preload="metadata" loop>
     <source src="/audio/wedding-recitation.mp3" type="audio/mpeg" />
   </audio>
+  <div class="creator-watermark" aria-label="Made by Aliyat.O">Made by Aliyat.O</div>
   <section id="envelope-screen" aria-label="Open wedding invitation">
     <p class="bismillah">In the name of Allah, the Most Gracious, the Most Merciful</p>
     <div class="envelope-wrap" id="envelope" role="button" tabindex="0" aria-label="Open invitation">
