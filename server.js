@@ -79,8 +79,8 @@ let httpServer;
 let shuttingDown = false;
 
 const DASHBOARD_COOKIE = "ta_dashboard_session";
-// Keep the private dashboard session available through the week after the wedding.
-const DASHBOARD_SESSION_EXPIRES_AT = new Date("2026-11-28T23:59:59+01:00").getTime();
+// Keep the private dashboard session available through one year after the wedding.
+const DASHBOARD_SESSION_EXPIRES_AT = new Date("2027-11-21T23:59:59+01:00").getTime();
 
 function stopServer(reason, exitCode = 0) {
   if (shuttingDown) return;
