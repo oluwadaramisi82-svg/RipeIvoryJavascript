@@ -38,3 +38,17 @@ mtime_ms = 1787133030183
 storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/4fe2785e-7f4d-4c83-bede-c2fe1ab50234/574d08c4-82bf-4d16-b706-f30fce538df8"
 storage_version_token = "1787133040437468"
 content_type = "audio/mpeg"
+
+[[outputs]]
+id = "WZiTxCFVr1oX4Xdpeged3"
+uri = "file://attached_assets/videoToMp3_2-through-third-song.mp3"
+type = "audio"
+title = "Mp3_2 — Through Third Song"
+description = "Mp3_2 kept from the beginning through the end of the third song, with the trailing silence removed and a short clean fade-out. The original upload is preserved."
+logical_id = "631464bb-c4df-49fb-b5dd-96fe1bf08a25"
+content_hash = "sha256:2859076be66abaa3ed79fd38250db3bac0f2c4b52fbacc71b1e5dbea452094aa"
+size = 10388040
+mtime_ms = 1787133232431
+storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/631464bb-c4df-49fb-b5dd-96fe1bf08a25/e17d03ed-1641-4ccb-ac69-3311d2a305f8"
+storage_version_token = "1787133242208188"
+content_type = "audio/mpeg"
