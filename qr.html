@@ -282,6 +282,52 @@
       cursor: pointer; transition: background .2s;
     }
     .btn-batch:hover { background: #ece8d9; }
+    .btn-whatsapp-batch {
+      width: 100%; padding: 13px;
+      margin-top: 9px;
+      background: var(--emerald); color: var(--gold-light);
+      border: 1px solid rgba(215,182,108,.45); border-radius: 0;
+      font: 600 .65rem/1 var(--sans);
+      letter-spacing: 1.8px; text-transform: uppercase;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-whatsapp-batch:hover { background: var(--emerald-soft); }
+    .batch-links {
+      display: none;
+      width: 100%;
+      margin-top: 22px;
+      border-top: 1px solid var(--line-gold);
+      padding-top: 16px;
+    }
+    .batch-links.visible { display: block; }
+    .batch-link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(215,182,108,.14);
+    }
+    .batch-link-name {
+      min-width: 0;
+      color: var(--emerald);
+      font: 500 1.05rem var(--serif);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .batch-link-send {
+      flex: 0 0 auto;
+      padding: 8px 10px;
+      border: 0;
+      background: var(--gold);
+      color: var(--emerald-dark);
+      font: 600 .57rem/1 var(--sans);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .batch-link-send:hover { background: var(--gold-light); }
 
     /* ── Footer ───────────────────────────────────────────── */
     .footer {
@@ -371,7 +417,9 @@
         id="batch-input"
         placeholder="Aunty Fatima&#10;Uncle Rasheed&#10;Cousin Maryam"
       ></textarea>
+      <button class="btn-whatsapp-batch" onclick="prepareWhatsAppBatch()">Prepare WhatsApp links</button>
       <button class="btn-batch" onclick="downloadBatch()">Download all as ZIP</button>
+      <div class="batch-links" id="batch-links" aria-live="polite"></div>
     </div>
 
   </div>
@@ -387,6 +435,39 @@
 
     function buildUrl(name) {
       return BASE_URL + '?to=' + encodeURIComponent(name);
+    }
+
+    function openWhatsAppForGuest(name) {
+      const url = buildUrl(name);
+      const message = `T&A 2026\n${url}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+    }
+
+    function prepareWhatsAppBatch() {
+      const raw = document.getElementById('batch-input').value;
+      const names = raw.split('\n').map(n => n.trim()).filter(Boolean).slice(0, 200);
+      const output = document.getElementById('batch-links');
+      if (names.length === 0) {
+        document.getElementById('batch-input').focus();
+        output.classList.remove('visible');
+        return;
+      }
+      output.innerHTML = '';
+      names.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'batch-link-item';
+        const label = document.createElement('span');
+        label.className = 'batch-link-name';
+        label.textContent = name;
+        const button = document.createElement('button');
+        button.className = 'batch-link-send';
+        button.type = 'button';
+        button.textContent = 'Send';
+        button.addEventListener('click', () => openWhatsAppForGuest(name));
+        item.append(label, button);
+        output.appendChild(item);
+      });
+      output.classList.add('visible');
     }
 
     async function renderQRToCanvas(canvas, url) {
