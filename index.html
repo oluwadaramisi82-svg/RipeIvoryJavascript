@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#07372b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="description" content="The wedding invitation of Ahmad Opeyemi and Toyibat Adeola." />
   <meta name="event:start_date" content="2026-11-21T11:00:00+01:00" />
   <meta name="event:location" content="Rolak Hotel & Suites, Adetola Hall, Ijebu Ode, Ogun State" />
@@ -1162,6 +1165,17 @@
       .contact a { padding: 8px 0; }
       .nav-links a { padding: 0 10px; }
     }
+
+    /* Avoid expensive motion for guests who reduce animation or use low-power devices. */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1252,9 +1266,9 @@
     <section class="content-shell">
       <div class="invitation-card">
         <div class="photo-slideshow" role="img" aria-label="Ahmad and Toyibat — photo slideshow">
-          <img class="photo-slide" src="attached_assets/slideshow-photo-blue-sharp.png" alt="Toyibat and Ahmad in coordinating blue outfits" />
-          <img class="photo-slide" src="attached_assets/slideshow-photo-white-teal-sharp.png" alt="Ahmad and Toyibat in white and teal" />
-          <img class="photo-slide" src="attached_assets/slideshow-photo-pink-sharp.png" alt="Toyibat and Ahmad smiling together" />
+          <img class="photo-slide" src="attached_assets/slideshow-photo-blue-sharp.png" alt="Toyibat and Ahmad in coordinating blue outfits" fetchpriority="high" decoding="async" />
+          <img class="photo-slide" src="attached_assets/slideshow-photo-white-teal-sharp.png" alt="Ahmad and Toyibat in white and teal" loading="lazy" decoding="async" />
+          <img class="photo-slide" src="attached_assets/slideshow-photo-pink-sharp.png" alt="Toyibat and Ahmad smiling together" loading="lazy" decoding="async" />
         </div>
         <div class="invitation-copy">
           <p class="bismillah-main">In the name of Allah, the Most Gracious, the Most Merciful</p>
@@ -1368,17 +1382,23 @@
 
   <script>
     /* ── Personalisation ───────────────────────────────────────── */
-    const params   = new URLSearchParams(window.location.search);
+    function getSearchParam(name) {
+      try {
+        if (window.URLSearchParams) return new URLSearchParams(window.location.search).get(name);
+      } catch (e) {}
+      const match = window.location.search.match(new RegExp("[?&]" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^&]*)"));
+      return match ? decodeURIComponent(match[1].replace(/\+/g, " ")) : null;
+    }
     function sanitizeGuestName(value) {
-      return String(value || "")
-        .normalize("NFKC")
+      const raw = String(value || "");
+      return (typeof raw.normalize === "function" ? raw.normalize("NFKC") : raw)
         .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
         .replace(/[<>]/g, "")
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, 120);
     }
-    const guestParam = sanitizeGuestName(params.get("to"));
+    const guestParam = sanitizeGuestName(getSearchParam("to"));
     const isGuestView = guestParam.length > 0;
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
@@ -1418,7 +1438,7 @@
       try {
         weddingAudio.volume = 0.68;
         weddingAudio.muted = false;
-        if (weddingAudio.readyState === HTMLMediaElement.HAVE_NOTHING) {
+        if (weddingAudio.readyState === 0) {
           weddingAudio.load();
         }
         await weddingAudio.play();
@@ -1634,10 +1654,11 @@
         if (countdownTimer) window.clearTimeout(countdownTimer);
         return;
       }
-      document.getElementById("days").textContent    = String(Math.floor(diff / 86400000)).padStart(2, "0");
-      document.getElementById("hours").textContent   = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, "0");
-      document.getElementById("minutes").textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-      document.getElementById("seconds").textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+      const twoDigits = (value) => ("0" + value).slice(-2);
+      document.getElementById("days").textContent    = twoDigits(Math.floor(diff / 86400000));
+      document.getElementById("hours").textContent   = twoDigits(Math.floor((diff % 86400000) / 3600000));
+      document.getElementById("minutes").textContent = twoDigits(Math.floor((diff % 3600000) / 60000));
+      document.getElementById("seconds").textContent = twoDigits(Math.floor((diff % 60000) / 1000));
 
       // Schedule against the next real second boundary instead of adding
       // 1000 ms repeatedly, which accumulates timer drift.
@@ -1649,6 +1670,15 @@
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) updateCountdown();
     });
+
+    // Optional offline shell: browsers without service-worker support simply
+    // continue normally, while guests on intermittent mobile data can reopen
+    // the invitation shell and photos after the first successful visit.
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>

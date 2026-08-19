@@ -436,15 +436,22 @@
   <script>
     const BASE_URL = window.location.origin + '/';
     function sanitizeGuestName(value) {
-      return String(value || '')
-        .normalize('NFKC')
+      const raw = String(value || '');
+      return (typeof raw.normalize === 'function' ? raw.normalize('NFKC') : raw)
         .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
         .replace(/[<>]/g, '')
         .replace(/\s+/g, ' ')
         .trim()
         .slice(0, 120);
     }
-    const presetName = sanitizeGuestName(new URLSearchParams(window.location.search).get('name'));
+    function getSearchParam(name) {
+      try {
+        if (window.URLSearchParams) return new URLSearchParams(window.location.search).get(name);
+      } catch (e) {}
+      const match = window.location.search.match(new RegExp("[?&]" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^&]*)"));
+      return match ? decodeURIComponent(match[1].replace(/\+/g, " ")) : null;
+    }
+    const presetName = sanitizeGuestName(getSearchParam('name'));
 
     function buildUrl(name) {
       return BASE_URL + '?to=' + encodeURIComponent(sanitizeGuestName(name));
@@ -578,6 +585,7 @@
       btn.disabled = true;
 
       try {
+        if (!window.JSZip) throw new Error('ZIP generator is unavailable');
         const zip = new JSZip();
         const offscreen = document.createElement('canvas');
         for (const name of names) {
@@ -590,6 +598,10 @@
         link.href = URL.createObjectURL(content);
         link.download = 'ta-wedding-qr-codes.zip';
         link.click();
+      } catch (err) {
+        const error = document.getElementById('qr-error');
+        error.textContent = 'The batch download is unavailable on this connection. You can still generate and download one QR code at a time.';
+        error.classList.add('visible');
       } finally {
         btn.textContent = 'Download all as ZIP';
         btn.disabled = false;
@@ -603,6 +615,12 @@
     if (presetName) {
       document.getElementById('guest-input').value = presetName;
       generateQR();
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
     }
   </script>
 </body>
