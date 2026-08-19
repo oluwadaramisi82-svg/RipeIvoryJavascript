@@ -343,6 +343,22 @@
       cursor: pointer;
     }
     .personalised-copy-btn:hover { background: var(--gold-light); }
+    .personalised-whatsapp-btn {
+      width: 100%;
+      margin-top: 9px;
+      padding: 8px 11px;
+      border: 1px solid rgba(215,182,108,.3);
+      background: rgba(13,75,58,.5);
+      color: rgba(236,220,170,.78);
+      font: 600 .57rem var(--sans);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .personalised-whatsapp-btn:hover {
+      background: rgba(28,102,81,.7);
+      color: var(--gold-light);
+    }
 
     /* ─── Guest greeting ────────────────────────────────────────── */
     .guest-greeting {
@@ -1064,6 +1080,7 @@
           <a class="personalised-link-value" id="personalised-link-value" href="#" target="_blank" rel="noopener" aria-label="Open personalized invitation link"></a>
           <button class="personalised-copy-btn" id="personalised-copy-btn" type="button">Copy</button>
         </div>
+        <button class="personalised-whatsapp-btn" id="personalised-whatsapp-btn" type="button">Share on WhatsApp</button>
       </div>
       <p class="personalise-feedback" id="personalise-feedback"></p>
     </div>
@@ -1286,6 +1303,7 @@
       const linkGuest = document.getElementById("personalised-link-guest");
       const linkValue = document.getElementById("personalised-link-value");
       const copyLinkBtn = document.getElementById("personalised-copy-btn");
+      const whatsappBtn = document.getElementById("personalised-whatsapp-btn");
 
       function buildLink() {
         const name = input.value.trim();
@@ -1355,6 +1373,12 @@
         copyBrandedLink(linkValue.href).then(copied).catch(() => {
           feedback.textContent = "Copy the T&A 2026 text using your browser.";
         });
+      });
+
+      whatsappBtn.addEventListener("click", () => {
+        if (!linkValue.href || linkValue.getAttribute("href") === "#") return;
+        const message = `T&A 2026\n${linkValue.href}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener");
       });
 
       qrBtn.addEventListener("click", () => {
