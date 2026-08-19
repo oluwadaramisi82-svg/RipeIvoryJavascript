@@ -1367,6 +1367,12 @@
       }
     }
 
+    function stopWeddingMusic() {
+      weddingAudio.pause();
+      weddingAudio.currentTime = 0;
+      setMusicButton(false);
+    }
+
     function openInvitation() {
       if (opened) return;
       opened = true;
@@ -1393,6 +1399,10 @@
       }
     });
     weddingAudio.addEventListener("ended", () => setMusicButton(false));
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopWeddingMusic();
+    });
+    window.addEventListener("pagehide", stopWeddingMusic);
 
     if (isGuestView) {
       // Guest view: show greeting, then auto-open after a short pause
