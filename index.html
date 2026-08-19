@@ -299,27 +299,6 @@
       color: var(--gold-light);
       background: rgba(4,22,13,.58);
     }
-    .guest-audio-prompt {
-      position: fixed;
-      right: max(18px, env(safe-area-inset-right));
-      bottom: max(18px, env(safe-area-inset-bottom));
-      z-index: 50;
-      display: none;
-      padding: 12px 16px;
-      border: 1px solid var(--gold);
-      background: rgba(7,55,43,.96);
-      color: var(--gold-light);
-      box-shadow: 0 10px 28px rgba(0,0,0,.28);
-      font: 600 .62rem/1 var(--sans);
-      letter-spacing: 1.4px;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    .guest-audio-prompt.visible { display: block; }
-    .guest-audio-prompt:hover {
-      background: var(--emerald-soft);
-      color: #fff4c9;
-    }
     @keyframes pulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 
     /* ─── Personalise bar ───────────────────────────────────────── */
@@ -1197,8 +1176,7 @@
       </div>
     </div>
     <p class="open-prompt" id="open-prompt">Click the invitation to open</p>
-  <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">Play wedding music</button>
-  <button class="guest-audio-prompt" id="guest-audio-prompt" type="button">Tap to play wedding music</button>
+    <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">Play wedding music</button>
 
     <!-- Shown to the SENDER when no ?to= param is present -->
     <div class="personalise-bar" id="personalise-bar" style="display:none">
@@ -1413,18 +1391,12 @@
     const mainWebsite    = document.getElementById("main-website");
     const weddingAudio   = document.getElementById("wedding-audio");
     const musicToggle    = document.getElementById("music-toggle");
-    const guestAudioPrompt = document.getElementById("guest-audio-prompt");
     let opened = false;
 
     function setMusicButton(isPlaying) {
       musicToggle.textContent = isPlaying ? "Pause wedding music" : "Play wedding music";
       musicToggle.setAttribute("aria-pressed", String(isPlaying));
       musicToggle.classList.toggle("playing", isPlaying);
-    }
-
-    function setGuestAudioPrompt(visible) {
-      if (!isGuestView) return;
-      guestAudioPrompt.classList.toggle("visible", visible);
     }
 
     async function playWeddingMusic() {
@@ -1436,12 +1408,10 @@
         }
         await weddingAudio.play();
         setMusicButton(true);
-        setGuestAudioPrompt(false);
         return true;
       } catch (e) {
         // Some browsers require a separate tap before allowing audio.
         setMusicButton(false);
-        setGuestAudioPrompt(true);
         return false;
       }
     }
@@ -1480,9 +1450,6 @@
         setMusicButton(false);
       }
     });
-    guestAudioPrompt.addEventListener("click", () => {
-      playWeddingMusic();
-    });
     weddingAudio.addEventListener("ended", () => setMusicButton(false));
     weddingAudio.addEventListener("error", () => {
       setMusicButton(false);
@@ -1494,12 +1461,12 @@
     window.addEventListener("pagehide", stopWeddingMusic);
 
     if (isGuestView) {
-      // Guest view: show greeting, then auto-open after a short pause
+      // Guest view: the guest opens the envelope with a direct tap.
       const welcome = document.getElementById("guest-welcome");
       welcome.textContent = "As-salamu alaykum wa rahmatullahi wa barakatuh, " + guestParam + ". We warmly welcome you to celebrate with us.";
       welcome.style.display = "block";
       const guestOpenPrompt = document.getElementById("open-prompt");
-      guestOpenPrompt.textContent = "Tap the envelope to open and play the music";
+      guestOpenPrompt.textContent = "Tap the envelope to open";
       guestOpenPrompt.style.display = "block";
     } else {
       // Sender view: show the personalise bar
