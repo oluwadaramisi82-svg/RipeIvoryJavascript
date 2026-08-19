@@ -199,9 +199,17 @@ app.post("/guests/login", (req, res) => {
   res.redirect(`/guests?key=${encodeURIComponent(key)}`);
 });
 
-// Private guest-opens page
+// Easier private guest-list entry point. It keeps the access key out of the
+// first URL guests see while retaining password protection.
 app.get("/dashboard", (req, res) => {
+  if (!hasDashboardSession(req)) {
+    return res.status(401).send(dashboardLoginPage(res.app.locals.guestKey));
+  }
   res.redirect(`/guests?key=${encodeURIComponent(res.app.locals.guestKey)}`);
+});
+
+app.get("/guest-list", (req, res) => {
+  res.redirect("/dashboard");
 });
 
 app.get("/guests", async (req, res) => {

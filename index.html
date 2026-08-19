@@ -1089,6 +1089,9 @@
   </style>
 </head>
 <body>
+  <audio id="wedding-audio" preload="metadata" loop>
+    <source src="attached_assets/islamic-wedding-instrumental.mp3" type="audio/mpeg" />
+  </audio>
   <section id="envelope-screen" aria-label="Open wedding invitation">
     <p class="bismillah">In the name of Allah, the Most Gracious, the Most Merciful</p>
     <div class="envelope-wrap" id="envelope" role="button" tabindex="0" aria-label="Open invitation">
@@ -1109,6 +1112,7 @@
       </div>
     </div>
     <p class="open-prompt" id="open-prompt">Click the invitation to open</p>
+    <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">Play wedding music</button>
 
     <!-- Shown to the SENDER when no ?to= param is present -->
     <div class="personalise-bar" id="personalise-bar" style="display:none">
@@ -1312,13 +1316,33 @@
     const envelope       = document.getElementById("envelope");
     const envelopeScreen = document.getElementById("envelope-screen");
     const mainWebsite    = document.getElementById("main-website");
+    const weddingAudio   = document.getElementById("wedding-audio");
+    const musicToggle    = document.getElementById("music-toggle");
     let opened = false;
+
+    function setMusicButton(isPlaying) {
+      musicToggle.textContent = isPlaying ? "Pause wedding music" : "Play wedding music";
+      musicToggle.setAttribute("aria-pressed", String(isPlaying));
+      musicToggle.classList.toggle("playing", isPlaying);
+    }
+
+    async function playWeddingMusic() {
+      try {
+        weddingAudio.volume = 0.42;
+        await weddingAudio.play();
+        setMusicButton(true);
+      } catch (e) {
+        // Some browsers require a separate tap before allowing audio.
+        setMusicButton(false);
+      }
+    }
 
     function openInvitation() {
       if (opened) return;
       opened = true;
       window.scrollTo(0, 0);
       envelope.classList.add("open");
+      playWeddingMusic();
       window.setTimeout(() => {
         envelopeScreen.classList.add("hidden");
         mainWebsite.classList.add("visible");
@@ -1330,6 +1354,15 @@
     envelope.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openInvitation(); }
     });
+    musicToggle.addEventListener("click", () => {
+      if (weddingAudio.paused) {
+        playWeddingMusic();
+      } else {
+        weddingAudio.pause();
+        setMusicButton(false);
+      }
+    });
+    weddingAudio.addEventListener("ended", () => setMusicButton(false));
 
     if (isGuestView) {
       // Guest view: show greeting, then auto-open after a short pause
