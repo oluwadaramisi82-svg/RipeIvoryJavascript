@@ -198,6 +198,13 @@
       letter-spacing: 2.4px;
       text-transform: uppercase;
     }
+    .guest-welcome {
+      display: none;
+      max-width: 220px;
+      margin-top: 10px;
+      color: var(--gold-light);
+      font: italic .78rem/1.35 var(--serif);
+    }
     .letter {
       position: absolute;
       bottom: 12px; left: 22px; z-index: 2;
@@ -1132,10 +1139,11 @@
         </div>
         <div class="wax-seal">T&amp;A</div>
         <div class="envelope-pocket"></div>
-        <div class="envelope-front-mark" aria-hidden="true">
+        <div class="envelope-front-mark">
           <span class="mark-monogram">T&amp;A</span>
           <strong>Ahmad &amp; Toyibat</strong>
           <small>Wedding Invitation · 21 November 2026</small>
+          <span class="guest-welcome" id="guest-welcome"></span>
         </div>
       </div>
     </div>
@@ -1166,8 +1174,6 @@
       <p class="personalise-feedback" id="personalise-feedback"></p>
     </div>
 
-    <!-- Shown to the GUEST when ?to= param is present -->
-    <p class="guest-greeting" id="guest-greeting" style="display:none"></p>
   </section>
 
   <main id="main-website">
@@ -1415,9 +1421,9 @@
 
     if (isGuestView) {
       // Guest view: show greeting, then auto-open after a short pause
-      const greeting = document.getElementById("guest-greeting");
-      greeting.textContent = "For " + guestParam + " — tap to open your invitation";
-      greeting.style.display = "block";
+      const welcome = document.getElementById("guest-welcome");
+      welcome.textContent = "Assalamu alaikum, " + guestParam + ". We warmly welcome you.";
+      welcome.style.display = "block";
       document.getElementById("open-prompt").style.display = "none";
       window.setTimeout(openInvitation, 2200);
     } else {
