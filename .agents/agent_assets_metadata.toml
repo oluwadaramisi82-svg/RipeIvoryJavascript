@@ -7,6 +7,7 @@ uri = "file://promo/music.mp3"
 type = "audio"
 title = "wedding promo bed"
 description = "Generated music: Elegant romantic wedding instrumental, warm strings and soft piano with gentle West African kora accents, uplifting and heartfelt, builds gently to a joyful swell, cinematic promo be…"
+logical_id = "4908332f-5e3c-4d5b-9575-a9407bf4a2a1"
 
 [[outputs]]
 id = "3e3DQemXYbrILW9hVjtgm"
@@ -14,6 +15,7 @@ uri = "file://attached_assets/generated_videos/ahmad-toyibat-promo.mp4"
 type = "video"
 title = "Ahmad & Toyibat — Wedding Promo Reel"
 description = "40-second portrait (9:16) promo video with the couple's photos, wedding details, and original instrumental music — ready to share on WhatsApp status and Instagram stories."
+logical_id = "2e86558b-10e1-4d36-b59b-994fe07b3ea4"
 
 [[outputs]]
 id = "Hez85b96LlkHBCjFj7ZRy"
@@ -21,3 +23,18 @@ uri = "file://attached_assets/islamic-wedding-instrumental.mp3"
 type = "audio"
 title = "islamic-wedding-instrumental"
 description = "Generated music: Gentle elegant Islamic-inspired wedding instrumental for a dark emerald and champagne-gold wedding invitation. Warm oud, soft ney flute, delicate qanun, subtle frame drum, peaceful c…"
+logical_id = "3da0d3cc-8cd6-44a5-9987-ae1d9117dee6"
+
+[[outputs]]
+id = "WUnrMekCyqbLkoV0YiQEd"
+uri = "file://attached_assets/wedding-medley-mix.mp3"
+type = "audio"
+title = "T&A 2026 Wedding Medley Mix"
+description = "A seamless 7:55 medley combining three sections from videoToMp3_1 with videoToMp3_2 using four-second crossfades and balanced loudness."
+logical_id = "4fe2785e-7f4d-4c83-bede-c2fe1ab50234"
+content_hash = "sha256:506879b3086d7e99b18c4236f5a1f9f12dcdcf90d2b271e7005e60b3353720ca"
+size = 11398671
+mtime_ms = 1787133030183
+storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/4fe2785e-7f4d-4c83-bede-c2fe1ab50234/574d08c4-82bf-4d16-b706-f30fce538df8"
+storage_version_token = "1787133040437468"
+content_type = "audio/mpeg"
