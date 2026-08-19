@@ -52,3 +52,17 @@ mtime_ms = 1787133232431
 storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/631464bb-c4df-49fb-b5dd-96fe1bf08a25/e17d03ed-1641-4ccb-ac69-3311d2a305f8"
 storage_version_token = "1787133242208188"
 content_type = "audio/mpeg"
+
+[[outputs]]
+id = "xp84wj2KgPTMaqcUnI41D"
+uri = "file://attached_assets/videoToMp3_2-cut-3m16s.mp3"
+type = "audio"
+title = "Mp3_2 — 03:16 Cut"
+description = "Mp3_2 trimmed to exactly 3 minutes 16 seconds with a short clean fade-out. The original upload remains unchanged."
+logical_id = "aba7bf5f-86a8-4dfe-a6cf-033e0befe324"
+content_hash = "sha256:ba96645b47c53aa5e8e5093826525714f14c9de4f033f853e744ffb6eceea8a6"
+size = 4706066
+mtime_ms = 1787133454570
+storage_uri = "gcs://replit-rams-assets-archer/rams/assets/repl:0bcfe2ce-3eec-4f22-b373-dbac10060dc5/aba7bf5f-86a8-4dfe-a6cf-033e0befe324/e340a4b3-3b19-4ce1-989f-89748ef178fc"
+storage_version_token = "1787133462642246"
+content_type = "audio/mpeg"
