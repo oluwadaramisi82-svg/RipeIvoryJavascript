@@ -14,3 +14,10 @@ uri = "file://attached_assets/generated_videos/ahmad-toyibat-promo.mp4"
 type = "video"
 title = "Ahmad & Toyibat — Wedding Promo Reel"
 description = "40-second portrait (9:16) promo video with the couple's photos, wedding details, and original instrumental music — ready to share on WhatsApp status and Instagram stories."
+
+[[outputs]]
+id = "Hez85b96LlkHBCjFj7ZRy"
+uri = "file://attached_assets/islamic-wedding-instrumental.mp3"
+type = "audio"
+title = "islamic-wedding-instrumental"
+description = "Generated music: Gentle elegant Islamic-inspired wedding instrumental for a dark emerald and champagne-gold wedding invitation. Warm oud, soft ney flute, delicate qanun, subtle frame drum, peaceful c…"

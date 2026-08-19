@@ -4,7 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="The wedding invitation of Ahmad Opeyemi and Toyibat Adeola." />
+  <meta name="event:start_date" content="2026-11-21T11:00:00+01:00" />
+  <meta name="event:location" content="Rolak Hotel & Suites, Adetola Hall, Ijebu Ode, Ogun State" />
   <title>Ahmad & Toyibat | Wedding Invitation</title>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WeddingEvent",
+      "name": "Ahmad Opeyemi & Toyibat Adeola's Wedding",
+      "description": "The wedding celebration of Ahmad Opeyemi and Toyibat Adeola.",
+      "startDate": "2026-11-21T11:00:00+01:00",
+      "endDate": "2026-11-21T15:00:00+01:00",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+      "location": {
+        "@type": "Place",
+        "name": "Rolak Hotel & Suites, Adetola Hall",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Adetola Hall",
+          "addressLocality": "Ijebu Ode",
+          "addressRegion": "Ogun State",
+          "addressCountry": "NG"
+        }
+      },
+      "organizer": {
+        "@type": "Person",
+        "name": "Ahmad Opeyemi & Toyibat Adeola"
+      }
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -228,6 +257,24 @@
       color: rgba(236,220,170,.55);
       font-size: .65rem; letter-spacing: 3.5px; text-transform: uppercase;
       animation: pulse 2.6s infinite;
+    }
+    .music-toggle {
+      position: relative; z-index: 1;
+      margin-top: 18px;
+      padding: 8px 14px;
+      border: 1px solid rgba(215,182,108,.35);
+      background: rgba(4,22,13,.34);
+      color: rgba(236,220,170,.72);
+      font: 600 .58rem var(--sans);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .music-toggle:hover,
+    .music-toggle.playing {
+      border-color: rgba(215,182,108,.7);
+      color: var(--gold-light);
+      background: rgba(4,22,13,.58);
     }
     @keyframes pulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
 
