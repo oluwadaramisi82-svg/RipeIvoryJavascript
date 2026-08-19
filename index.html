@@ -568,6 +568,15 @@
       font-size: .7rem; font-weight: 600;
       letter-spacing: 3px; text-transform: uppercase;
     }
+    .local-time-note {
+      display: block;
+      margin-top: 9px;
+      color: rgba(236,220,170,.5);
+      font-size: .57rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: none;
+    }
 
     /* Countdown — vertical-ruled columns, no boxes */
     .countdown {
@@ -1221,7 +1230,10 @@
         <div class="hero-monogram" aria-hidden="true">T&amp;A</div>
         <span class="eyebrow">The solemnization of</span>
         <h1 class="hero-title">Ahmad <span class="hero-amp">&amp;</span> Toyibat</h1>
-        <p class="hero-date">Saturday, 21st November 2026 &nbsp;•&nbsp; 11:00 AM</p>
+        <p class="hero-date">
+          Saturday, 21st November 2026 &nbsp;•&nbsp; 11:00 AM WAT
+          <span class="local-time-note" id="local-event-time"></span>
+        </p>
         <div class="ornament" aria-hidden="true"><span>◆</span></div>
         <div class="countdown" aria-label="Countdown to the wedding">
           <div class="time-box"><span class="time-number" id="days">00</span><span class="time-label">Days</span></div>
@@ -1271,7 +1283,7 @@
         <div class="event-band-sep" aria-hidden="true"></div>
         <div class="event-band-item">
           <strong>Time</strong>
-          <span>11:00 AM</span>
+          <span>11:00 AM WAT</span>
         </div>
         <div class="event-band-sep" aria-hidden="true"></div>
         <div class="event-band-item">
@@ -1300,7 +1312,7 @@
       <div class="info-grid">
         <article class="info-card">
           <h3>The Ceremony</h3>
-          <p><strong>Saturday, 21st November 2026</strong><br />11:00 AM<br />Rolak Hotel and Suites<br />Adetola Hall</p>
+          <p><strong>Saturday, 21st November 2026</strong><br />11:00 AM WAT<br />Rolak Hotel and Suites<br />Adetola Hall</p>
         </article>
         <article class="info-card">
           <h3>Reception</h3>
@@ -1585,9 +1597,31 @@
     /* ── Countdown ─────────────────────────────────────────────── */
     // Keep the target explicit and timezone-aware: 11:00:00 WAT on the event
     // date. Date.now() is sampled on every update so the display never drifts.
-    const weddingDate = Date.parse("2026-11-21T11:00:00+01:00");
+    // The event is fixed in Nigeria time. Date.parse converts this explicit
+    // WAT instant correctly for every visitor, regardless of their timezone.
+    const WEDDING_EVENT_ISO = "2026-11-21T11:00:00+01:00";
+    const weddingDate = Date.parse(WEDDING_EVENT_ISO);
     const countdown   = document.querySelector(".countdown");
+    const localEventTime = document.getElementById("local-event-time");
     let countdownTimer;
+
+    function updateLocalEventTime() {
+      if (!localEventTime || !Number.isFinite(weddingDate)) return;
+      try {
+        const localFormatter = new Intl.DateTimeFormat(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZoneName: "short",
+        });
+        localEventTime.textContent = "Your local time: " + localFormatter.format(new Date(weddingDate));
+      } catch (e) {
+        localEventTime.textContent = "";
+      }
+    }
+
     function updateCountdown() {
       const diff = weddingDate - Date.now();
       if (diff <= 0) {
@@ -1606,6 +1640,7 @@
       countdownTimer = window.setTimeout(updateCountdown, nextSecond + 5);
     }
     updateCountdown();
+    updateLocalEventTime();
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) updateCountdown();
     });
