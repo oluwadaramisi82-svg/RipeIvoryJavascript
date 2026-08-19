@@ -404,6 +404,16 @@ app.use(
   })
 );
 
+// Keep an individual request failure from taking down the invitation server.
+app.use((err, req, res, next) => {
+  console.error("Unhandled request error:", err.message);
+  if (res.headersSent) return next(err);
+  if (req.path.startsWith("/api/")) {
+    return res.status(500).json({ ok: false, error: "Temporary server error" });
+  }
+  res.status(500).send("The invitation is temporarily unavailable. Please refresh and try again.");
+});
+
 // ── Boot sequence ─────────────────────────────────────────────────────────────
 async function start() {
   // 1. Derive access key — fails fast if PGPASSWORD absent

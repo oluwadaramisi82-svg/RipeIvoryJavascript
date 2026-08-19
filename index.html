@@ -1434,6 +1434,10 @@
       }
     });
     weddingAudio.addEventListener("ended", () => setMusicButton(false));
+    weddingAudio.addEventListener("error", () => {
+      setMusicButton(false);
+      musicToggle.setAttribute("aria-label", "Wedding music is unavailable. Tap to try again.");
+    });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stopWeddingMusic();
     });
