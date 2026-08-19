@@ -431,10 +431,19 @@
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
     const BASE_URL = window.location.origin + '/';
-    const presetName = new URLSearchParams(window.location.search).get('name');
+    function sanitizeGuestName(value) {
+      return String(value || '')
+        .normalize('NFKC')
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+        .replace(/[<>]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 120);
+    }
+    const presetName = sanitizeGuestName(new URLSearchParams(window.location.search).get('name'));
 
     function buildUrl(name) {
-      return BASE_URL + '?to=' + encodeURIComponent(name);
+      return BASE_URL + '?to=' + encodeURIComponent(sanitizeGuestName(name));
     }
 
     function openWhatsAppForGuest(name) {
@@ -445,7 +454,7 @@
 
     function prepareWhatsAppBatch() {
       const raw = document.getElementById('batch-input').value;
-      const names = raw.split('\n').map(n => n.trim()).filter(Boolean).slice(0, 200);
+      const names = raw.split('\n').map(sanitizeGuestName).filter(Boolean).slice(0, 200);
       const output = document.getElementById('batch-links');
       if (names.length === 0) {
         document.getElementById('batch-input').focus();
@@ -506,8 +515,9 @@
     }
 
     async function generateQR() {
-      const name = document.getElementById('guest-input').value.trim();
+      const name = sanitizeGuestName(document.getElementById('guest-input').value);
       if (!name) { document.getElementById('guest-input').focus(); return; }
+      document.getElementById('guest-input').value = name;
       const error = document.getElementById('qr-error');
       error.classList.remove('visible');
       try {
@@ -531,7 +541,7 @@
     }
 
     function downloadQR() {
-      const name = document.getElementById('guest-input').value.trim();
+      const name = sanitizeGuestName(document.getElementById('guest-input').value);
       const canvas = document.getElementById('qr-canvas');
       const link = document.createElement('a');
       link.download = 'invitation-qr-' + name.replace(/\s+/g, '-').toLowerCase() + '.png';
@@ -541,7 +551,7 @@
 
     async function downloadBatch() {
       const raw = document.getElementById('batch-input').value;
-      const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
+      const names = raw.split('\n').map(sanitizeGuestName).filter(Boolean);
       if (names.length === 0) { document.getElementById('batch-input').focus(); return; }
 
       const btn = document.querySelector('.btn-batch');
@@ -571,8 +581,8 @@
       if (e.key === 'Enter') generateQR();
     });
 
-    if (presetName && presetName.trim()) {
-      document.getElementById('guest-input').value = presetName.trim().slice(0, 80);
+    if (presetName) {
+      document.getElementById('guest-input').value = presetName;
       generateQR();
     }
   </script>

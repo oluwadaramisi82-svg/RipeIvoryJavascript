@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
+const fs = require("fs");
 const { Pool } = require("pg");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -54,6 +55,15 @@ const esc = (s) =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+function sanitizeGuestName(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
+    .replace(/[<>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+}
 const fmt = (d) =>
   new Date(d).toLocaleString("en-GB", {
     timeZone: "Africa/Lagos",
@@ -65,10 +75,39 @@ const fmt = (d) =>
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+let httpServer;
+let shuttingDown = false;
 
 const DASHBOARD_COOKIE = "ta_dashboard_session";
 // Keep the private dashboard session available through the week after the wedding.
 const DASHBOARD_SESSION_EXPIRES_AT = new Date("2026-11-28T23:59:59+01:00").getTime();
+
+function stopServer(reason, exitCode = 0) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`Shutting down (${reason})...`);
+
+  const finish = () => {
+    pool.end()
+      .catch((err) => console.error("Database pool shutdown failed:", err.message))
+      .finally(() => process.exit(exitCode));
+  };
+
+  if (!httpServer) return finish();
+  httpServer.close(finish);
+  setTimeout(() => process.exit(exitCode || 1), 10000).unref();
+}
+
+process.on("SIGTERM", () => stopServer("SIGTERM"));
+process.on("SIGINT", () => stopServer("SIGINT"));
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+  stopServer("uncaughtException", 1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled rejection:", reason);
+  stopServer("unhandledRejection", 1);
+});
 
 function dashboardSignature(value) {
   return crypto.createHmac("sha256", process.env.SESSION_SECRET).update(value).digest("hex");
@@ -163,12 +202,79 @@ async function fetchGuestRows() {
   return rows;
 }
 
+// Serve the recitation explicitly so mobile browsers can discover its media
+// type, length, and byte-range support before attempting playback.
+const WEDDING_AUDIO_PATH = path.join(
+  __dirname,
+  "attached_assets",
+  "0_437386947545e0ce0f342da17bf6b846_1787116397183.mp3"
+);
+
+function serveWeddingAudio(req, res) {
+  fs.stat(WEDDING_AUDIO_PATH, (statError, file) => {
+    if (statError) return res.status(404).send("Audio not found.");
+
+    const total = file.size;
+    const baseHeaders = {
+      "Content-Type": "audio/mpeg",
+      "Content-Disposition": 'inline; filename="wedding-recitation.mp3"',
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "public, max-age=3600, immutable",
+      "X-Content-Type-Options": "nosniff",
+    };
+    const rangeHeader = req.headers.range;
+
+    if (!rangeHeader) {
+      res.set({ ...baseHeaders, "Content-Length": total });
+      if (req.method === "HEAD") return res.status(200).end();
+      res.status(200);
+      return fs.createReadStream(WEDDING_AUDIO_PATH).pipe(res);
+    }
+
+    const range = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader);
+    if (!range || (!range[1] && !range[2])) {
+      return res.status(416).set({
+        ...baseHeaders,
+        "Content-Range": `bytes */${total}`,
+      }).end();
+    }
+
+    let start = range[1] ? Number.parseInt(range[1], 10) : 0;
+    let end = range[2] ? Number.parseInt(range[2], 10) : total - 1;
+    if (!range[1] && range[2]) {
+      const suffixLength = Number.parseInt(range[2], 10);
+      start = Math.max(total - suffixLength, 0);
+      end = total - 1;
+    }
+
+    if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || start >= total || start > end) {
+      return res.status(416).set({
+        ...baseHeaders,
+        "Content-Range": `bytes */${total}`,
+      }).end();
+    }
+
+    end = Math.min(end, total - 1);
+    const length = end - start + 1;
+    res.status(206).set({
+      ...baseHeaders,
+      "Content-Length": length,
+      "Content-Range": `bytes ${start}-${end}/${total}`,
+    });
+    if (req.method === "HEAD") return res.end();
+    return fs.createReadStream(WEDDING_AUDIO_PATH, { start, end }).pipe(res);
+  });
+}
+
+app.get("/audio/wedding-recitation.mp3", serveWeddingAudio);
+app.head("/audio/wedding-recitation.mp3", serveWeddingAudio);
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 // Record a visit — called from the invitation page beacon
 app.post("/api/visit", async (req, res) => {
   try {
-    const name = String((req.body && req.body.name) || "").trim().slice(0, 120);
+    const name = sanitizeGuestName(req.body && req.body.name);
     if (!name) return res.status(400).json({ ok: false, error: "name required" });
     await pool.query("INSERT INTO invitation_visits (guest_name) VALUES ($1)", [name]);
     res.json({ ok: true });
@@ -181,13 +287,24 @@ app.post("/api/visit", async (req, res) => {
 // Record that a personalised QR code was generated for a guest.
 app.post("/api/qr-created", async (req, res) => {
   try {
-    const name = String((req.body && req.body.name) || "").trim().slice(0, 120);
+    const name = sanitizeGuestName(req.body && req.body.name);
     if (!name) return res.status(400).json({ ok: false, error: "name required" });
     await pool.query("INSERT INTO guest_qr_codes (guest_name) VALUES ($1)", [name]);
     res.json({ ok: true });
   } catch (err) {
     console.error("QR record failed:", err.message);
     res.status(500).json({ ok: false });
+  }
+});
+
+app.get("/health", async (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  try {
+    await pool.query("SELECT 1");
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("Health check failed:", err.message);
+    res.status(503).json({ ok: false });
   }
 });
 
@@ -299,12 +416,13 @@ async function start() {
     console.log("Schema ready.");
   } catch (err) {
     console.error("Schema init failed — cannot start:", err.message);
-    process.exit(1);
+    return process.exit(1);
   }
 
   // 3. Listen
+  if (shuttingDown) return;
   const port = process.env.PORT || 5000;
-  app.listen(port, "0.0.0.0", () => {
+  httpServer = app.listen(port, "0.0.0.0", () => {
     const domain = process.env.REPLIT_DEV_DOMAIN || `localhost:${port}`;
     console.log(`Invitation server running on port ${port}`);
     console.log(`\n🔒 Guest-opens list (private — do not share this URL):`);
@@ -313,4 +431,7 @@ async function start() {
   });
 }
 
-start();
+start().catch((err) => {
+  console.error("Server startup failed:", err);
+  stopServer("startup failure", 1);
+});

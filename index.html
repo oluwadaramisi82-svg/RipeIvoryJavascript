@@ -1118,7 +1118,7 @@
 </head>
 <body>
   <audio id="wedding-audio" preload="metadata" loop>
-    <source src="attached_assets/0_437386947545e0ce0f342da17bf6b846_1787116397183.mp3" type="audio/mpeg" />
+    <source src="/audio/wedding-recitation.mp3" type="audio/mpeg" />
   </audio>
   <section id="envelope-screen" aria-label="Open wedding invitation">
     <p class="bismillah">In the name of Allah, the Most Gracious, the Most Merciful</p>
@@ -1320,7 +1320,16 @@
   <script>
     /* ── Personalisation ───────────────────────────────────────── */
     const params   = new URLSearchParams(window.location.search);
-    const guestParam = (params.get("to") || "").trim();
+    function sanitizeGuestName(value) {
+      return String(value || "")
+        .normalize("NFKC")
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
+        .replace(/[<>]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 120);
+    }
+    const guestParam = sanitizeGuestName(params.get("to"));
     const isGuestView = guestParam.length > 0;
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
@@ -1427,7 +1436,7 @@
       const clearLinkBtn = document.getElementById("personalised-clear-btn");
 
       function buildLink() {
-        const name = input.value.trim();
+        const name = sanitizeGuestName(input.value);
         if (!name) return null;
         const url = new URL(window.location.href);
         url.search = "";           // clear any leftover params
@@ -1460,7 +1469,8 @@
       btn.addEventListener("click", () => {
         const link = buildLink();
         if (!link) { feedback.textContent = "Enter a name first."; return; }
-        const name = input.value.trim();
+        const name = sanitizeGuestName(input.value);
+        input.value = name;
         linkGuest.textContent = "For " + name;
         linkValue.textContent = "T&A 2026";
         linkValue.href = link;
@@ -1513,8 +1523,9 @@
       });
 
       qrBtn.addEventListener("click", () => {
-        const name = input.value.trim();
+        const name = sanitizeGuestName(input.value);
         if (!name) { feedback.textContent = "Enter a name first."; input.focus(); return; }
+        input.value = name;
         const qrPage = new URL("qr.html", window.location.href);
         qrPage.searchParams.set("name", name);
         window.open(qrPage.toString(), "_blank", "noopener");
