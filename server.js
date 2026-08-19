@@ -202,12 +202,12 @@ async function fetchGuestRows() {
   return rows;
 }
 
-// Serve the recitation explicitly so mobile browsers can discover its media
+// Serve the wedding music explicitly so mobile browsers can discover its media
 // type, length, and byte-range support before attempting playback.
 const WEDDING_AUDIO_PATH = path.join(
   __dirname,
   "attached_assets",
-  "0_437386947545e0ce0f342da17bf6b846_1787116397183.mp3"
+  "wedding-smooth-remix.mp3"
 );
 
 function serveWeddingAudio(req, res) {
@@ -217,7 +217,7 @@ function serveWeddingAudio(req, res) {
     const total = file.size;
     const baseHeaders = {
       "Content-Type": "audio/mpeg",
-      "Content-Disposition": 'inline; filename="wedding-recitation.mp3"',
+      "Content-Disposition": 'inline; filename="wedding-smooth-remix.mp3"',
       "Accept-Ranges": "bytes",
       "Cache-Control": "public, max-age=3600, immutable",
       "X-Content-Type-Options": "nosniff",
@@ -266,8 +266,8 @@ function serveWeddingAudio(req, res) {
   });
 }
 
-app.get("/audio/wedding-recitation.mp3", serveWeddingAudio);
-app.head("/audio/wedding-recitation.mp3", serveWeddingAudio);
+app.get("/audio/wedding-smooth-remix.mp3", serveWeddingAudio);
+app.head("/audio/wedding-smooth-remix.mp3", serveWeddingAudio);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 

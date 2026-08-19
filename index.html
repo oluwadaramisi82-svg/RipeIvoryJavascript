@@ -1144,7 +1144,7 @@
 </head>
 <body>
   <audio id="wedding-audio" preload="metadata" loop>
-    <source src="/audio/wedding-recitation.mp3" type="audio/mpeg" />
+    <source src="/audio/wedding-smooth-remix.mp3" type="audio/mpeg" />
   </audio>
   <div class="creator-watermark" aria-label="Made by Aliyat.O">Made by Aliyat.O</div>
   <section id="envelope-screen" aria-label="Open wedding invitation">
@@ -1168,7 +1168,7 @@
       </div>
     </div>
     <p class="open-prompt" id="open-prompt">Click the invitation to open</p>
-    <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">Play Quran recitation</button>
+  <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">Play wedding music</button>
 
     <!-- Shown to the SENDER when no ?to= param is present -->
     <div class="personalise-bar" id="personalise-bar" style="display:none">
@@ -1386,7 +1386,7 @@
     let opened = false;
 
     function setMusicButton(isPlaying) {
-      musicToggle.textContent = isPlaying ? "Pause Quran recitation" : "Play Quran recitation";
+      musicToggle.textContent = isPlaying ? "Pause wedding music" : "Play wedding music";
       musicToggle.setAttribute("aria-pressed", String(isPlaying));
       musicToggle.classList.toggle("playing", isPlaying);
     }
