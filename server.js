@@ -67,8 +67,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const DASHBOARD_COOKIE = "ta_dashboard_session";
-// Keep the private dashboard session available through the wedding day.
-const DASHBOARD_SESSION_EXPIRES_AT = new Date("2026-11-21T23:59:59+01:00").getTime();
+// Keep the private dashboard session available through the week after the wedding.
+const DASHBOARD_SESSION_EXPIRES_AT = new Date("2026-11-28T23:59:59+01:00").getTime();
 
 function dashboardSignature(value) {
   return crypto.createHmac("sha256", process.env.SESSION_SECRET).update(value).digest("hex");
