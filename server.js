@@ -3,8 +3,10 @@ const path = require("path");
 const crypto = require("crypto");
 const fs = require("fs");
 const { Pool } = require("pg");
+const { ReplitConnectors } = require("@replit/connectors-sdk");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const connectors = new ReplitConnectors();
 
 // ── Schema init ───────────────────────────────────────────────────────────────
 // Runs once at startup before the server accepts requests.
@@ -71,6 +73,69 @@ const fmt = (d) =>
     timeStyle: "short",
   }) + " (WAT)";
 
+// ── Failure email alerts ───────────────────────────────────────────────────────
+// The mailer is isolated from visitor requests: an alert delivery problem must
+// never make the invitation unavailable or create repeated error cascades.
+const ALERT_EMAIL_TO = process.env.ALERT_EMAIL_TO;
+const ALERT_EMAIL_FROM = process.env.ALERT_EMAIL_FROM;
+const ALERT_COOLDOWN_MS = 15 * 60 * 1000;
+const recentAlerts = new Map();
+
+function alertMessage(error) {
+  const value = error instanceof Error ? error.stack || error.message : String(error || "Unknown error");
+  return value.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ").slice(0, 2000);
+}
+
+async function sendFailureAlert(kind, error, context = {}) {
+  if (!ALERT_EMAIL_TO || !ALERT_EMAIL_FROM) {
+    console.warn("Failure alert not sent: alert email settings are missing.");
+    return false;
+  }
+
+  const key = `${kind}:${context.path || ""}`;
+  const now = Date.now();
+  if (now - (recentAlerts.get(key) || 0) < ALERT_COOLDOWN_MS) return false;
+  recentAlerts.set(key, now);
+
+  const details = [
+    `Time: ${new Date(now).toISOString()}`,
+    context.method && context.path ? `Request: ${context.method} ${context.path}` : null,
+    `Details: ${alertMessage(error)}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  try {
+    const response = await connectors.proxy("resend", "/emails", {
+      method: "POST",
+      body: {
+        from: ALERT_EMAIL_FROM,
+        to: [ALERT_EMAIL_TO],
+        subject: `[T&A Wedding Alert] ${kind}`,
+        text: `The wedding invitation needs attention.\n\n${details}`,
+      },
+    });
+    if (!response.ok) {
+      const responseText = (await response.text()).slice(0, 500);
+      throw new Error(`Resend returned ${response.status}: ${responseText}`);
+    }
+    console.log(`Failure alert sent: ${kind}`);
+    return true;
+  } catch (alertError) {
+    recentAlerts.delete(key);
+    console.error(`Failure alert could not be sent (${kind}):`, alertError.message);
+    return false;
+  }
+}
+
+async function alertThenStop(reason, error) {
+  await Promise.race([
+    sendFailureAlert(`Fatal server error: ${reason}`, error),
+    new Promise((resolve) => setTimeout(resolve, 2500)),
+  ]);
+  stopServer(reason, 1);
+}
+
 // ── App setup ─────────────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
@@ -102,11 +167,11 @@ process.on("SIGTERM", () => stopServer("SIGTERM"));
 process.on("SIGINT", () => stopServer("SIGINT"));
 process.on("uncaughtException", (err) => {
   console.error("Uncaught exception:", err);
-  stopServer("uncaughtException", 1);
+  void alertThenStop("uncaughtException", err);
 });
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled rejection:", reason);
-  stopServer("unhandledRejection", 1);
+  void alertThenStop("unhandledRejection", reason);
 });
 
 function dashboardSignature(value) {
@@ -280,6 +345,7 @@ app.post("/api/visit", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("visit insert failed:", err.message);
+    void sendFailureAlert("Guest visit tracking failed", err, { method: req.method, path: req.path });
     res.status(500).json({ ok: false });
   }
 });
@@ -293,6 +359,7 @@ app.post("/api/qr-created", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("QR record failed:", err.message);
+    void sendFailureAlert("QR tracking failed", err, { method: req.method, path: req.path });
     res.status(500).json({ ok: false });
   }
 });
@@ -304,6 +371,7 @@ app.get("/health", async (req, res) => {
     res.status(200).json({ ok: true });
   } catch (err) {
     console.error("Health check failed:", err.message);
+    void sendFailureAlert("Database health check failed", err, { method: req.method, path: req.path });
     res.status(503).json({ ok: false });
   }
 });
@@ -407,6 +475,7 @@ app.use(
 // Keep an individual request failure from taking down the invitation server.
 app.use((err, req, res, next) => {
   console.error("Unhandled request error:", err.message);
+  void sendFailureAlert("Unhandled request error", err, { method: req.method, path: req.path });
   if (res.headersSent) return next(err);
   if (req.path.startsWith("/api/")) {
     return res.status(500).json({ ok: false, error: "Temporary server error" });
@@ -426,6 +495,7 @@ async function start() {
     console.log("Schema ready.");
   } catch (err) {
     console.error("Schema init failed — cannot start:", err.message);
+    await sendFailureAlert("Server startup failed", err);
     return process.exit(1);
   }
 
@@ -441,7 +511,8 @@ async function start() {
   });
 }
 
-start().catch((err) => {
+start().catch(async (err) => {
   console.error("Server startup failed:", err);
+  await sendFailureAlert("Server startup failed", err);
   stopServer("startup failure", 1);
 });
