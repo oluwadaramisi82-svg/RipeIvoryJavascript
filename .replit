@@ -41,7 +41,7 @@ timeoutMs = 60000
 
 [userenv.shared]
 ALERT_EMAIL_FROM = "T&A Wedding Alerts <onboarding@resend.dev>"
-ALERT_EMAIL_TO = "Oluwadaramisi82@gmail.com"
+ALERT_EMAIL_TO = "oluwadaramisi82@gmail.com"
 
 [userenv.development]
 
