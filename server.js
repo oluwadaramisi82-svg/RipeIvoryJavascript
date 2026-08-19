@@ -123,6 +123,13 @@ function checkKey(req, res, key) {
   return true;
 }
 
+function requireDashboardSession(req, res, next) {
+  if (!hasDashboardSession(req)) {
+    return res.status(401).send(dashboardLoginPage(res.app.locals.guestKey));
+  }
+  next();
+}
+
 async function fetchVisits() {
   const { rows } = await pool.query(
     `SELECT guest_name,
@@ -201,10 +208,7 @@ app.post("/guests/login", (req, res) => {
 
 // Easier private guest-list entry point. It keeps the access key out of the
 // first URL guests see while retaining password protection.
-app.get("/dashboard", (req, res) => {
-  if (!hasDashboardSession(req)) {
-    return res.status(401).send(dashboardLoginPage(res.app.locals.guestKey));
-  }
+app.get("/dashboard", requireDashboardSession, (req, res) => {
   res.redirect(`/guests?key=${encodeURIComponent(res.app.locals.guestKey)}`);
 });
 
