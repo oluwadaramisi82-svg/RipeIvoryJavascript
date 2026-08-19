@@ -405,6 +405,19 @@
       cursor: pointer;
     }
     .personalised-copy-btn:hover { background: var(--gold-light); }
+    .personalised-clear-btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 7px 10px;
+      border: 0;
+      background: transparent;
+      color: rgba(236,220,170,.52);
+      font: 600 .55rem var(--sans);
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .personalised-clear-btn:hover { color: var(--gold-light); }
     .personalised-whatsapp-btn {
       width: 100%;
       margin-top: 9px;
@@ -1148,6 +1161,7 @@
           <button class="personalised-copy-btn" id="personalised-copy-btn" type="button">Copy</button>
         </div>
         <button class="personalised-whatsapp-btn" id="personalised-whatsapp-btn" type="button">Share on WhatsApp</button>
+        <button class="personalised-clear-btn" id="personalised-clear-btn" type="button">Clear guest link</button>
       </div>
       <p class="personalise-feedback" id="personalise-feedback"></p>
     </div>
@@ -1400,6 +1414,7 @@
       const linkValue = document.getElementById("personalised-link-value");
       const copyLinkBtn = document.getElementById("personalised-copy-btn");
       const whatsappBtn = document.getElementById("personalised-whatsapp-btn");
+      const clearLinkBtn = document.getElementById("personalised-clear-btn");
 
       function buildLink() {
         const name = input.value.trim();
@@ -1475,6 +1490,16 @@
         if (!linkValue.href || linkValue.getAttribute("href") === "#") return;
         const message = `T&A 2026\n${linkValue.href}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+      });
+
+      clearLinkBtn.addEventListener("click", () => {
+        input.value = "";
+        linkGuest.textContent = "";
+        linkValue.textContent = "";
+        linkValue.href = "#";
+        linkCard.classList.remove("visible");
+        feedback.textContent = "";
+        input.focus();
       });
 
       qrBtn.addEventListener("click", () => {
