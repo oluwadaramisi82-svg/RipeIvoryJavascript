@@ -71,7 +71,7 @@ const fmt = (d) =>
     timeZone: "Africa/Lagos",
     dateStyle: "medium",
     timeStyle: "short",
-  }) + " (WAT)";
+  }) + " (Lagos time)";
 
 // ── Failure email alerts ───────────────────────────────────────────────────────
 // The mailer is isolated from visitor requests: an alert delivery problem must

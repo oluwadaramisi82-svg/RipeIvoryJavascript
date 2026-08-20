@@ -1267,7 +1267,7 @@
         <span class="eyebrow">The solemnization of</span>
         <h1 class="hero-title">Ahmad <span class="hero-amp">&amp;</span> Toyibat</h1>
         <p class="hero-date">
-          Saturday, 21st November 2026 &nbsp;•&nbsp; 11:00 AM WAT
+          Saturday, 21st November 2026 &nbsp;•&nbsp; 11:00 AM Lagos time
           <span class="local-time-note" id="local-event-time"></span>
         </p>
         <div class="ornament" aria-hidden="true"><span>◆</span></div>
@@ -1319,7 +1319,7 @@
         <div class="event-band-sep" aria-hidden="true"></div>
         <div class="event-band-item">
           <strong>Time</strong>
-          <span>11:00 AM WAT</span>
+          <span>11:00 AM Lagos time</span>
         </div>
         <div class="event-band-sep" aria-hidden="true"></div>
         <div class="event-band-item">
@@ -1348,7 +1348,7 @@
       <div class="info-grid">
         <article class="info-card">
           <h3>The Ceremony</h3>
-          <p><strong>Saturday, 21st November 2026</strong><br />11:00 AM WAT<br />Rolak Hotel and Suites<br />Adetola Hall</p>
+          <p><strong>Saturday, 21st November 2026</strong><br />11:00 AM Lagos time<br />Rolak Hotel and Suites<br />Adetola Hall</p>
         </article>
         <article class="info-card">
           <h3>Reception</h3>
@@ -1485,6 +1485,7 @@
     const weddingAudio   = document.getElementById("wedding-audio");
     const musicToggle    = document.getElementById("music-toggle");
     let opened = false;
+    let musicLoadRequested = false;
 
     function setMusicButton(isPlaying) {
       musicToggle.textContent = isPlaying ? "Pause wedding music" : "Play wedding music";
@@ -1493,6 +1494,7 @@
     }
 
     async function playWeddingMusic() {
+      musicLoadRequested = true;
       try {
         weddingAudio.volume = 0.68;
         weddingAudio.muted = false;
@@ -1689,10 +1691,10 @@
     }
 
     /* ── Countdown ─────────────────────────────────────────────── */
-    // Keep the target explicit and timezone-aware: 11:00:00 WAT on the event
+    // Keep the target explicit and timezone-aware: 11:00:00 Lagos time on the event
     // date. Date.now() is sampled on every update so the display never drifts.
     // The event is fixed in Nigeria time. Date.parse converts this explicit
-    // WAT instant correctly for every visitor, regardless of their timezone.
+    // Lagos-time instant correctly for every visitor, regardless of their timezone.
     const WEDDING_EVENT_ISO = "2026-11-21T11:00:00+01:00";
     const weddingDate = Date.parse(WEDDING_EVENT_ISO);
     const countdown   = document.querySelector(".countdown");
@@ -1742,6 +1744,16 @@
 
     const connectionStatus = document.getElementById("connection-status");
     let connectionMessageTimer;
+    const imageNodes = document.querySelectorAll("img");
+    const invitationImages = [];
+    for (let imageIndex = 0; imageIndex < imageNodes.length; imageIndex += 1) {
+      invitationImages.push(imageNodes[imageIndex]);
+    }
+    invitationImages.forEach((image) => {
+      image.addEventListener("error", () => {
+        image.dataset.loadFailed = "true";
+      });
+    });
     function showConnectionStatus(message, autoHide) {
       if (!connectionStatus) return;
       connectionStatus.textContent = message;
@@ -1749,6 +1761,38 @@
       window.clearTimeout(connectionMessageTimer);
       if (autoHide) {
         connectionMessageTimer = window.setTimeout(() => connectionStatus.classList.add("hidden"), 3500);
+      }
+    }
+    function retryFailedImages() {
+      invitationImages.forEach((image) => {
+        const failed = image.dataset.loadFailed === "true" || (image.complete && image.naturalWidth === 0);
+        const source = image.getAttribute("src");
+        if (!failed || !source) return;
+        const sourceSet = image.getAttribute("srcset");
+        delete image.dataset.loadFailed;
+        image.removeAttribute("src");
+        image.removeAttribute("srcset");
+        window.setTimeout(() => {
+          image.setAttribute("src", source);
+          if (sourceSet) image.setAttribute("srcset", sourceSet);
+        }, 0);
+      });
+    }
+    function warmRequestedMusic() {
+      // Do not spend a guest's data on a 5.5 MB file unless they already
+      // pressed the music control. Playback itself still requires a new tap
+      // on browsers that block autoplay after reconnection.
+      if (!musicLoadRequested || navigator.onLine === false || !weddingAudio.paused) return;
+      if (weddingAudio.readyState === 0 || weddingAudio.networkState === 3) {
+        weddingAudio.load();
+        showConnectionStatus("Connection restored. Wedding music is loading; tap Play when it is ready.", true);
+      }
+    }
+    function retryDeferredResources() {
+      retryFailedImages();
+      warmRequestedMusic();
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.ready.then((registration) => registration.update()).catch(() => {});
       }
     }
     if (navigator.onLine === false) {
@@ -1760,6 +1804,7 @@
     window.addEventListener("online", () => {
       showConnectionStatus("Connection restored.", true);
       flushPendingEvents();
+      retryDeferredResources();
     });
     flushPendingEvents();
 

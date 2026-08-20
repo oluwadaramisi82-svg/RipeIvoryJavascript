@@ -3,7 +3,7 @@
  * The wedding audio is intentionally excluded because it is several megabytes
  * and should only be downloaded after the guest chooses to play it.
  */
-const CACHE_NAME = "ta-wedding-shell-v3";
+const CACHE_NAME = "ta-wedding-shell-v4";
 const CORE_ASSETS = [
   "/",
   "/qr.html",

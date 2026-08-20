@@ -2,3 +2,4 @@
 - [Node workflow bootstrap](node-workflow-bootstrap.md) — restart the Node server only after project dependencies have been installed in the workspace.
 - [Dashboard access control](dashboard-access-control.md) — keep private activity behind both the unshared dashboard URL and a stored password.
 - [Offline QR assets](offline-qr-assets.md) — QR tools are bundled locally so guest QR creation survives an unreliable third-party CDN.
+- [Network recovery](network-recovery.md) — reconnect events retry failed page resources and queued records without reloading the invitation.

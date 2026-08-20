@@ -602,9 +602,33 @@
         document.getElementById('qr-output').classList.add('visible');
         recordQrCreated(name);
       } catch (err) {
-        error.textContent = 'The QR generator could not load. Please refresh and try again.';
+        error.textContent = 'The QR generator is waiting for a connection and will retry automatically.';
         error.classList.add('visible');
       }
+    }
+
+    function loadLocalTool(src, globalName) {
+      if (window[globalName]) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => window[globalName] ? resolve() : reject(new Error(globalName + ' did not load'));
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+    function recoverQrTools() {
+      if (navigator.onLine === false) return;
+      Promise.all([
+        loadLocalTool('/vendor/qrcode.min.js', 'QRCode'),
+        loadLocalTool('/vendor/jszip.min.js', 'JSZip'),
+      ]).then(() => {
+        const error = document.getElementById('qr-error');
+        error.classList.remove('visible');
+        if (presetName && !document.getElementById('qr-output').classList.contains('visible')) {
+          generateQR();
+        }
+      }).catch(() => {});
     }
 
     function downloadQR() {
@@ -658,8 +682,12 @@
       generateQR();
     }
 
-    window.addEventListener('online', flushPendingEvents);
+    window.addEventListener('online', () => {
+      flushPendingEvents();
+      recoverQrTools();
+    });
     flushPendingEvents();
+    recoverQrTools();
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
