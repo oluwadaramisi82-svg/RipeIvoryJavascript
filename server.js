@@ -466,8 +466,16 @@ app.get("/guests.csv", async (req, res) => {
 // Static invitation files
 app.use(
   express.static(path.join(__dirname), {
-    setHeaders(res) {
-      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+    setHeaders(res, filePath) {
+      // Keep HTML and the service worker fresh, but let phones reuse images and
+      // local browser tools when mobile data is slow or temporarily unavailable.
+      const extension = path.extname(filePath).toLowerCase();
+      const reusableAsset = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".js", ".css"].includes(extension);
+      if (reusableAsset && path.basename(filePath) !== "sw.js") {
+        res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+      } else {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+      }
     },
   })
 );

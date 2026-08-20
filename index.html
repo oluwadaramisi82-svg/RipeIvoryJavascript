@@ -228,6 +228,22 @@
       pointer-events: none;
       user-select: none;
     }
+    .connection-status {
+      position: fixed;
+      left: max(12px, env(safe-area-inset-left));
+      right: max(12px, env(safe-area-inset-right));
+      bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 70;
+      padding: 10px 14px;
+      border: 1px solid rgba(215,182,108,.42);
+      background: rgba(7,55,43,.96);
+      color: var(--gold-light);
+      font: 500 .68rem/1.45 var(--sans);
+      letter-spacing: .04em;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .connection-status.hidden { display: none; }
     .letter {
       position: absolute;
       bottom: 12px; left: 22px; z-index: 2;
@@ -1179,9 +1195,10 @@
   </style>
 </head>
 <body>
-  <audio id="wedding-audio" preload="auto" loop>
+  <audio id="wedding-audio" preload="none" loop>
     <source src="/audio/wedding-smooth-remix.mp3?v=linear-medley-20260819" type="audio/mpeg" />
   </audio>
+  <div class="connection-status hidden" id="connection-status" role="status" aria-live="polite"></div>
   <div class="creator-watermark" aria-label="Made by Aliyat.O">Made by Aliyat.O</div>
   <section id="envelope-screen" aria-label="Open wedding invitation">
     <p class="bismillah">In the name of Allah, the Most Gracious, the Most Merciful</p>
@@ -1403,21 +1420,62 @@
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
     window.scrollTo(0, 0);
 
+    // Keep non-essential activity records until a weak connection returns.
+    // The invitation itself never waits for these requests.
+    const PENDING_EVENT_KEY = "ta-pending-events-v1";
+    function readPendingEvents() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PENDING_EVENT_KEY) || "[]");
+        return Array.isArray(saved) ? saved.slice(-30) : [];
+      } catch (e) { return []; }
+    }
+    function savePendingEvents(events) {
+      try {
+        if (events.length) localStorage.setItem(PENDING_EVENT_KEY, JSON.stringify(events.slice(-30)));
+        else localStorage.removeItem(PENDING_EVENT_KEY);
+      } catch (e) {}
+    }
+    function queueEvent(path, body) {
+      const events = readPendingEvents();
+      events.push({ path, body });
+      savePendingEvents(events);
+    }
+    function sendEvent(path, body) {
+      if (navigator.onLine === false || !window.fetch) {
+        queueEvent(path, body);
+        return;
+      }
+      window.fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        keepalive: true,
+      }).then((response) => {
+        if (!response.ok) queueEvent(path, body);
+      }).catch(() => queueEvent(path, body));
+    }
+    function flushPendingEvents() {
+      const events = readPendingEvents();
+      if (!events.length || navigator.onLine === false || !window.fetch) return;
+      Promise.all(events.map((event) =>
+        window.fetch(event.path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(event.body),
+          keepalive: true,
+        }).then((response) => response.ok).catch(() => false)
+      )).then((results) => savePendingEvents(events.filter((event, index) => !results[index])));
+    }
+
     // Inject guest name into the invitation copy
     if (isGuestView) {
       const guestName = document.getElementById("guest-name");
       guestName.textContent = guestParam;
       guestName.style.display = "block";
 
-      // Record that this guest opened their invitation (name + time only)
-      try {
-        const payload = JSON.stringify({ name: guestParam });
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon("/api/visit", new Blob([payload], { type: "application/json" }));
-        } else {
-          fetch("/api/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: payload, keepalive: true });
-        }
-      } catch (e) { /* tracking must never break the invitation */ }
+      // Record that this guest opened their invitation (name + time only).
+      // A failed network request is queued and retried when the device reconnects.
+      sendEvent("/api/visit", { name: guestParam });
     }
 
     /* ── Envelope / reveal ─────────────────────────────────────── */
@@ -1447,6 +1505,14 @@
       } catch (e) {
         // Some browsers require a separate tap before allowing audio.
         setMusicButton(false);
+        if (typeof showConnectionStatus === "function") {
+          showConnectionStatus(
+            navigator.onLine === false
+              ? "Wedding music needs an internet connection. The invitation is still available."
+              : "Wedding music is taking longer to load. Please tap the music button again.",
+            true
+          );
+        }
         return false;
       }
     }
@@ -1489,6 +1555,9 @@
     weddingAudio.addEventListener("error", () => {
       setMusicButton(false);
       musicToggle.setAttribute("aria-label", "Wedding music is unavailable. Tap to try again.");
+      if (typeof showConnectionStatus === "function") {
+        showConnectionStatus("Wedding music could not load on this connection. You can try again later.", true);
+      }
     });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stopWeddingMusic();
@@ -1670,6 +1739,29 @@
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) updateCountdown();
     });
+
+    const connectionStatus = document.getElementById("connection-status");
+    let connectionMessageTimer;
+    function showConnectionStatus(message, autoHide) {
+      if (!connectionStatus) return;
+      connectionStatus.textContent = message;
+      connectionStatus.classList.remove("hidden");
+      window.clearTimeout(connectionMessageTimer);
+      if (autoHide) {
+        connectionMessageTimer = window.setTimeout(() => connectionStatus.classList.add("hidden"), 3500);
+      }
+    }
+    if (navigator.onLine === false) {
+      showConnectionStatus("You are offline. The invitation remains available; music, maps, calendar and WhatsApp need a connection.");
+    }
+    window.addEventListener("offline", () => {
+      showConnectionStatus("You are offline. The invitation remains available; music, maps, calendar and WhatsApp need a connection.");
+    });
+    window.addEventListener("online", () => {
+      showConnectionStatus("Connection restored.", true);
+      flushPendingEvents();
+    });
+    flushPendingEvents();
 
     // Optional offline shell: browsers without service-worker support simply
     // continue normally, while guests on intermittent mobile data can reopen

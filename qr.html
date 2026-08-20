@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="/vendor/qrcode.min.js"></script>
   <style>
     :root {
       --emerald: #0d4b3a;
@@ -432,9 +432,54 @@
     <a href="/">← Back to invitation</a>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="/vendor/jszip.min.js"></script>
   <script>
     const BASE_URL = window.location.origin + '/';
+    const PENDING_EVENT_KEY = 'ta-pending-events-v1';
+    function readPendingEvents() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PENDING_EVENT_KEY) || '[]');
+        return Array.isArray(saved) ? saved.slice(-30) : [];
+      } catch (e) { return []; }
+    }
+    function savePendingEvents(events) {
+      try {
+        if (events.length) localStorage.setItem(PENDING_EVENT_KEY, JSON.stringify(events.slice(-30)));
+        else localStorage.removeItem(PENDING_EVENT_KEY);
+      } catch (e) {}
+    }
+    function queueEvent(path, body) {
+      const events = readPendingEvents();
+      events.push({ path, body });
+      savePendingEvents(events);
+    }
+    function recordQrCreated(name) {
+      const body = { name };
+      if (navigator.onLine === false || !window.fetch) {
+        queueEvent('/api/qr-created', body);
+        return;
+      }
+      window.fetch('/api/qr-created', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: true,
+      }).then((response) => {
+        if (!response.ok) queueEvent('/api/qr-created', body);
+      }).catch(() => queueEvent('/api/qr-created', body));
+    }
+    function flushPendingEvents() {
+      const events = readPendingEvents();
+      if (!events.length || navigator.onLine === false || !window.fetch) return;
+      Promise.all(events.map((event) =>
+        window.fetch(event.path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event.body),
+          keepalive: true,
+        }).then((response) => response.ok).catch(() => false)
+      )).then((results) => savePendingEvents(events.filter((event, index) => !results[index])));
+    }
     function sanitizeGuestName(value) {
       const raw = String(value || '');
       return (typeof raw.normalize === 'function' ? raw.normalize('NFKC') : raw)
@@ -555,11 +600,7 @@
         urlLabel.textContent = 'T&A 2026';
         urlLabel.href = url;
         document.getElementById('qr-output').classList.add('visible');
-        fetch('/api/qr-created', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name })
-        }).catch(() => {});
+        recordQrCreated(name);
       } catch (err) {
         error.textContent = 'The QR generator could not load. Please refresh and try again.';
         error.classList.add('visible');
@@ -616,6 +657,9 @@
       document.getElementById('guest-input').value = presetName;
       generateQR();
     }
+
+    window.addEventListener('online', flushPendingEvents);
+    flushPendingEvents();
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
