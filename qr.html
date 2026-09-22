@@ -332,6 +332,14 @@
       cursor: pointer;
     }
     .batch-link-send:hover { background: var(--gold-light); }
+    .generation-status {
+      min-height: 1.2em;
+      margin-top: 12px;
+      font: 500 .72rem/1.5 var(--sans);
+      color: var(--muted);
+      text-align: center;
+    }
+    .generation-status.error { color: #9c3a2e; }
 
     /* ── Footer ───────────────────────────────────────────── */
     .footer {
@@ -425,6 +433,7 @@
       <button class="btn-batch" onclick="downloadBatch()">Download all as ZIP</button>
       <div class="batch-links" id="batch-links" aria-live="polite"></div>
     </div>
+    <p class="generation-status" id="generation-status" role="status" aria-live="polite"></p>
 
   </div>
 
@@ -585,6 +594,21 @@
       ctx.fillText('2026', canvas.width / 2, y + 25);
     }
 
+    async function recordGenerated(names) {
+      const response = await fetch('/api/qr-created', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ names })
+      });
+      if (!response.ok) throw new Error('Could not record QR generation');
+    }
+
+    function setGenerationStatus(message, isError = false) {
+      const status = document.getElementById('generation-status');
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
     async function generateQR() {
       const name = sanitizeGuestName(document.getElementById('guest-input').value);
       if (!name) { document.getElementById('guest-input').focus(); return; }
@@ -658,15 +682,18 @@
           const blob = await new Promise(res => offscreen.toBlob(res, 'image/png'));
           zip.file('invitation-qr-' + name.replace(/\s+/g, '-').toLowerCase() + '.png', blob);
         }
+        await recordGenerated(names);
         const content = await zip.generateAsync({ type: 'blob' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
         link.download = 'ta-wedding-qr-codes.zip';
         link.click();
+        setGenerationStatus(names.length + ' QR codes recorded in the generation log.');
       } catch (err) {
         const error = document.getElementById('qr-error');
-        error.textContent = 'The batch download is unavailable on this connection. You can still generate and download one QR code at a time.';
+        error.textContent = 'The batch download or its activity log is unavailable on this connection. Please try again.';
         error.classList.add('visible');
+        setGenerationStatus('The batch was not downloaded because it could not be recorded.', true);
       } finally {
         btn.textContent = 'Download all as ZIP';
         btn.disabled = false;

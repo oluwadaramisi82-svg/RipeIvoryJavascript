@@ -353,10 +353,13 @@ app.post("/api/visit", async (req, res) => {
 // Record that a personalised QR code was generated for a guest.
 app.post("/api/qr-created", async (req, res) => {
   try {
-    const name = sanitizeGuestName(req.body && req.body.name);
-    if (!name) return res.status(400).json({ ok: false, error: "name required" });
-    await pool.query("INSERT INTO guest_qr_codes (guest_name) VALUES ($1)", [name]);
-    res.json({ ok: true });
+    const body = req.body || {};
+    const rawNames = Array.isArray(body.names) ? body.names.slice(0, 200) : [body.name];
+    const names = rawNames.map(sanitizeGuestName).filter(Boolean);
+    if (!names.length) return res.status(400).json({ ok: false, error: "name required" });
+    const placeholders = names.map((_, index) => `($${index + 1})`).join(", ");
+    await pool.query(`INSERT INTO guest_qr_codes (guest_name) VALUES ${placeholders}`, names);
+    res.json({ ok: true, recorded: names.length });
   } catch (err) {
     console.error("QR record failed:", err.message);
     void sendFailureAlert("QR tracking failed", err, { method: req.method, path: req.path });
@@ -428,17 +431,40 @@ app.get("/guests", async (req, res) => {
   th,td{padding:.6rem .8rem;text-align:left;border-bottom:1px solid #efe7d9;font-size:.95rem}
   th{background:#f6efe3;color:#7a5c3e}
   .empty{text-align:center;color:#9a8a78;padding:2rem}
-  a.csv{display:inline-block;margin-top:1rem;color:#7a5c3e}
+  .actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1rem}
+  a.csv{color:#7a5c3e}
+  form{margin:0}
+  button.clear{border:0;background:#9c3a2e;color:#fff;padding:.55rem .85rem;font:inherit;cursor:pointer}
+  button.clear:hover{background:#7a2a20}
 </style></head><body><div class="wrap">
 <h1>Guest invitation activity</h1>
 <p class="sub">${rows.length} guest${rows.length === 1 ? "" : "s"} with QR or open activity · times shown in Lagos time</p>
 <table><thead><tr><th>Guest</th><th>QR created</th><th>Last QR created</th><th>Invitation opened</th><th>Last opened</th></tr></thead>
 <tbody>${body}</tbody></table>
-<a class="csv" href="/guests.csv?key=${encodeURIComponent(GUEST_LIST_KEY)}">Download as spreadsheet (CSV)</a>
+<div class="actions">
+  <a class="csv" href="/guests.csv?key=${encodeURIComponent(GUEST_LIST_KEY)}">Download as spreadsheet (CSV)</a>
+  <form method="post" action="/guests/qr-clear?key=${encodeURIComponent(GUEST_LIST_KEY)}" onsubmit="return confirm('Clear every QR generation record? This cannot be undone.')">
+    <button class="clear" type="submit">Clear QR history</button>
+  </form>
+</div>
 </div></body></html>`);
   } catch (err) {
     console.error("guest list failed:", err.message);
     res.status(500).send("Could not load the guest list.");
+  }
+});
+
+app.post("/guests/qr-clear", async (req, res) => {
+  const GUEST_LIST_KEY = res.app.locals.guestKey;
+  if (!checkKey(req, res, GUEST_LIST_KEY)) return;
+  if (!hasDashboardSession(req)) return res.status(401).send("Dashboard password required.");
+  try {
+    await pool.query("TRUNCATE TABLE guest_qr_codes RESTART IDENTITY");
+    res.redirect(`/guests?key=${encodeURIComponent(GUEST_LIST_KEY)}`);
+  } catch (err) {
+    console.error("QR history clear failed:", err.message);
+    void sendFailureAlert("QR history clear failed", err, { method: req.method, path: req.path });
+    res.status(500).send("Could not clear the QR history.");
   }
 });
 
@@ -513,9 +539,10 @@ async function start() {
   httpServer = app.listen(port, "0.0.0.0", () => {
     const domain = process.env.REPLIT_DEV_DOMAIN || `localhost:${port}`;
     console.log(`Invitation server running on port ${port}`);
-    console.log(`\n🔒 Guest-opens list (private — do not share this URL):`);
-    console.log(`   https://${domain}/guests?key=${guestKey}`);
-    console.log(`   CSV: https://${domain}/guests.csv?key=${guestKey}\n`);
+    console.log(`\n🔒 Private URLs (do not share):`);
+    console.log(`   Guest opens:  https://${domain}/guests?key=${guestKey}`);
+    console.log(`   Guest opens CSV:  https://${domain}/guests.csv?key=${guestKey}`);
+    console.log(`   QR activity is included in the password-protected guest dashboard.\n`);
   });
 }
 
